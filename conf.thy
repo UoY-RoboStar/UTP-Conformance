@@ -1,7 +1,11 @@
 theory conf
   imports 
-    "Circus_Toolkit.Channels_Events" "UTP-Reactive-Designs.utp_rea_designs" "Prism_Filter"
-begin   
+    Prism_Filter
+    "UTP-Stateful-Failure.utp_sf_rdes"
+    "Circus_Toolkit.Circus_Toolkit"
+begin
+
+type_synonym ('e, 's) caction = "('s, 'e) sfrd hrel"
 
 
 unbundle UTP_Logic_Syntax 
@@ -23,7 +27,12 @@ definition set_approx :: "real \<Rightarrow> real set \<Rightarrow> (real set) s
 
 (*Represent the alphabet of a process: replace with real definition later.*)
 consts process_alpha :: "('e, 's) caction \<Rightarrow> 'e set" ("\<alpha>_") 
+(*
+alphabet ('e, 's) circus_alpha = "('e list, 's) rdes_alpha" +
+  ref :: "'e set"
 
+type_synonym ('e, 's) caction = "('e, 's) circus_alpha hrel"
+*)
 
 definition Approx :: "real \<Rightarrow> ('b \<times> real \<Longrightarrow>\<^sub>\<triangle> 'e) \<Rightarrow> ('e, 's) caction \<Rightarrow> ('e, 's) caction" where
 "Approx eps tc P = R3c(\<exists> t. \<exists> a. P\<lbrakk>\<guillemotleft>t\<guillemotright>, ((\<alpha> \<guillemotleft>P\<guillemotright>) - \<guillemotleft>a\<guillemotright>)/tr\<^sup>>, ref\<^sup>>\<rbrakk> \<and>
