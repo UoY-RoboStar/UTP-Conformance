@@ -19,17 +19,15 @@ fun out_concat :: "nat \<Rightarrow> real list \<Rightarrow> c list" where
 "out_concat n ins = out_concat (n-1) (ins) @ [evparam out (n, ins(n))]"
 
 
-term "(ins, outs) \<in> p"
 definition CyclicRCController :: "nat \<Rightarrow> nat \<Rightarrow> ((real list \<times> real list) \<Rightarrow> bool) \<Rightarrow> (c, 's) caction" where
-"CyclicRCController insize outsize p = [true\<^sub>r 
-                                        \<turnstile> (\<exists>ins::real list. \<exists>outs::real list.(
+"CyclicRCController insize outsize p = RH(true\<^sub>r \<turnstile> (\<exists>ins::real list. \<exists>outs::real list.(
                                             (\<guillemotleft>p (ins, outs)\<guillemotright>) \<and> 
                                             (\<exists> i \<in> {1..\<guillemotleft>insize\<guillemotright>}. tt = (inp_concat i ins) \<and> 
                                                                   (evparam inp (i,ins(i))) \<notin> ref\<^sup>>)) \<or>
-                                            (\<exists> i \<in> {1..\<guillemotleft>outsize\<guillemotright>}. tt = (out_concat i outs) \<and> (evparam out (i,ins(i))) \<notin> ref\<^sup>>)) | 
-                                          (\<exists>ins::real list. \<exists>outs::real list.
-                                            (\<guillemotleft>p (ins, outs)\<guillemotright>) \<and> tt = (inp_concat \<guillemotleft>insize\<guillemotright> ins) @ (out_concat \<guillemotleft>outsize\<guillemotright> outs)) ]\<^sub>R"
-
+                                            (\<exists> i \<in> {1..\<guillemotleft>outsize\<guillemotright>}. tt = (out_concat i outs) \<and> (evparam out (i,ins(i))) \<notin> ref\<^sup>>))\<^sub>e
+                  \<triangleleft> wait\<^sup>> \<triangleright> 
+                  (\<exists>ins::real list. \<exists>outs::real list.
+                      (\<guillemotleft>p (ins, outs)\<guillemotright>) \<and> tt = (inp_concat \<guillemotleft>insize\<guillemotright> ins) @ (out_concat \<guillemotleft>outsize\<guillemotright> outs))\<^sub>e)"
 
 (*AnglePID Constants:*)
 definition Pc :: "real" where "Pc = 60"
@@ -37,7 +35,6 @@ definition Dc :: "real" where "Dc = 0.6"
 
 
 (*AnglePID Reactive Contract: *)
-
 definition AnglePID_UTP :: "(context_ch, unit) caction" where
 "AnglePID_UTP = RH(true\<^sub>r \<turnstile> (\<exists>currNewError::real. \<exists>currDiff::real. \<exists>currAngleOut::real.
                  (currAngleOut = (Pc * currNewError + Dc * currDiff) ) \<longrightarrow>
@@ -50,6 +47,7 @@ definition AnglePID_UTP :: "(context_ch, unit) caction" where
                   (tt = [(evparam anewError (\<guillemotleft>currNewError\<guillemotright>)), (evparam adiff (\<guillemotleft>currDiff\<guillemotright>)), 
                          (evparam angleOutputE (\<guillemotleft>currAngleOut\<guillemotright>))])\<^sub>e)\<^sub>e)"
 
+(*AnglePID reactive contract in terms of the c (inp and out) channel.*)
 definition AnglePID_UTP_out :: "(c, unit) caction" where
 "AnglePID_UTP_out = RH(true\<^sub>r \<turnstile> (\<exists>currNewError::real. \<exists>currDiff::real. \<exists>currAngleOut::real.
                  (currAngleOut = (Pc * currNewError + Dc * currDiff) ) \<longrightarrow>
@@ -61,20 +59,6 @@ definition AnglePID_UTP_out :: "(c, unit) caction" where
                 \<triangleleft> wait\<^sup>> \<triangleright> 
                   (tt = [(evparam inp (\<guillemotleft>1\<guillemotright>, \<guillemotleft>currNewError\<guillemotright>)), (evparam inp (\<guillemotleft>2\<guillemotright>, \<guillemotleft>currDiff\<guillemotright>)), 
                          (evparam out (\<guillemotleft>1\<guillemotright>, \<guillemotleft>currAngleOut\<guillemotright>))])\<^sub>e)\<^sub>e)"
-
-
-definition AnglePID_UTP_out_mod :: "(c, unit) caction" where
-"AnglePID_UTP_out_mod = RH(true\<^sub>r \<turnstile> (\<exists>currNewError::real. \<exists>currDiff::real. \<exists>currAngleOut::real.
-                 (currAngleOut = (Pc * currNewError + Dc * currDiff) ) \<longrightarrow>
-                ((tt = [] \<and> ((evparam inp (\<guillemotleft>1\<guillemotright>, \<guillemotleft>currNewError\<guillemotright>)) \<notin> ref\<^sup>>)) \<or> 
-                 (tt = [(evparam inp (\<guillemotleft>1\<guillemotright>, \<guillemotleft>currNewError\<guillemotright>))] \<and> ((evparam inp (\<guillemotleft>2\<guillemotright>, \<guillemotleft>currDiff\<guillemotright>)) \<notin> ref\<^sup>>)) \<or>
-                 (tt = [(evparam inp (\<guillemotleft>1\<guillemotright>, \<guillemotleft>currNewError\<guillemotright>)), (evparam inp (\<guillemotleft>2\<guillemotright>, \<guillemotleft>currDiff\<guillemotright>))]
-                     \<and> ((evparam out (\<guillemotleft>1\<guillemotright>, \<guillemotleft>currAngleOut\<guillemotright>)) \<notin> ref\<^sup>>))
-                )\<^sub>e 
-                \<triangleleft> wait\<^sup>> \<triangleright> 
-                  (tt = [(evparam inp (\<guillemotleft>1\<guillemotright>, \<guillemotleft>currNewError\<guillemotright>)), (evparam inp (\<guillemotleft>2\<guillemotright>, \<guillemotleft>currDiff\<guillemotright>)), 
-                         (evparam out (\<guillemotleft>1\<guillemotright>, \<guillemotleft>currAngleOut + 0.5\<guillemotright>))])\<^sub>e)\<^sub>e)"
-
 
 definition layerSize_ex :: "nat \<Rightarrow> nat" where
 "layerSize_ex x = x"
@@ -175,7 +159,7 @@ lemma "fun_to_list 2 f = [] @ [f(1)] @ [f(2)]"
 
 thm "fun_to_list.elims"
 
-lemma len_f2l: "#fun_to_list n f = n" by (induct n ; simp) (*automated induction, *)
+lemma len_f2l: "#fun_to_list n f = n" by (induct n ; simp)
 
 
 fun annoutput :: "nat \<Rightarrow> nat \<Rightarrow> real list \<Rightarrow> real" where
@@ -204,11 +188,10 @@ definition layerRes0 :: "\<nat> \<times> \<real> \<Longrightarrow>\<^sub>\<trian
 definition dist_concat :: "nat \<Rightarrow> (nat \<leftrightarrow> 'a list) \<Rightarrow> 'a list" where
 "dist_concat n R = concat ( fun_to_list n ( rel_apply (R) ) )"
 
-
 (*ANN pattern, constants are for AnglePIDANN: *)
 definition ANNPattern :: "(ann_ch) set \<Rightarrow> (ann_ch, 's) caction" where
 "ANNPattern I = 
-[true\<^sub>r \<turnstile> ( (#(filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) < insize) \<and> 
+RH(true\<^sub>r \<turnstile> ( ( (#(filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) < insize) \<and> 
          (tt = (filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) \<and> (\<not> ( csbasic (chinstn (layerRes0) (#(filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) + 1)) \<subseteq> ref\<^sup>>))))
          \<or> 
          (#(filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) = insize \<and>
@@ -216,8 +199,8 @@ definition ANNPattern :: "(ann_ch) set \<Rightarrow> (ann_ch, 's) caction" where
             tt = (butlast (layeroutput (filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) (l, n) ) ) \<and> 
             last (layeroutput (filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) (l, n)) \<notin> ref\<^sup>>
            )
-          )
-     | #(filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) = insize \<and> (tt = layeroutput (filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) (layerNo, layerSize(layerNo)))]\<^sub>R
-"
+          ) )\<^sub>e
+                  \<triangleleft> wait\<^sup>> \<triangleright> 
+                  ( #(filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) = insize \<and> (tt = layeroutput (filter (\<lambda>x. x \<in> \<guillemotleft>I\<guillemotright>) tt) (layerNo, layerSize(layerNo))) )\<^sub>e)"
 
 end
