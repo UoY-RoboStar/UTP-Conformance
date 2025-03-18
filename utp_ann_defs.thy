@@ -1,6 +1,6 @@
 theory utp_ann_defs
   imports 
-    "conf" 
+    "utp_sfrd_conf" 
 begin   
 
 (*layerRes and relevant channel instantiation:*)
@@ -162,14 +162,14 @@ thm "fun_to_list.elims"
 lemma len_f2l: "#fun_to_list n f = n" by (induct n ; simp)
 
 
-fun annoutput :: "nat \<Rightarrow> nat \<Rightarrow> real list \<Rightarrow> real" where
-"annoutput 0 n ins = ins(n)" | 
-"annoutput l n ins = relu( dotprod ( (fun_to_list (layerSize(l-1)) (rel_apply ({(pn, annoutput (l-1) (pn) (ins)) | pn. pn \<in> {1..layerSize (l-1)}})) ) ,
+fun annout :: "nat \<Rightarrow> nat \<Rightarrow> real list \<Rightarrow> real" where
+"annout 0 n ins = ins(n)" | 
+"annout l n ins = relu( dotprod ( (fun_to_list (layerSize(l-1)) (rel_apply ({(pn, annout (l-1) (pn) (ins)) | pn. pn \<in> {1..layerSize (l-1)}})) ) ,
                        (weights l n) ) + (biases l n))" 
 
 (*Definition B.1 in the thesis:*)
 definition nodeoutput :: "nat \<Rightarrow> nat \<Rightarrow> real list \<Rightarrow> ann_ch" where
-"nodeoutput l n ins = evparam layerRes (l, n, (annoutput (l) (n) (ins)))"
+"nodeoutput l n ins = evparam layerRes (l, n, (annout (l) (n) (ins)))"
 
 lemma layeroutput1:
 "n \<le> #input \<Longrightarrow> #layeroutput input (0, n) = n" by (simp)

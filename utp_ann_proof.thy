@@ -1,6 +1,6 @@
 theory utp_ann_proof
   imports 
-    "UTP_ANN_Defs"
+    "utp_ann_defs"
 begin   
 
 full_exprs
@@ -32,11 +32,6 @@ lemma mono_norm:
 lemma norm_lem_1: "(snd(r) > fst(r) \<and> snd(r') > fst(r'))
        \<Longrightarrow> norm (norm x r r') r' r = x" by (simp add: norm_def)
 
-
-value "denormOut 1 (0.085)"
-
-value "denormOut 1 (0.5)"
-
 (*Normalisation distributivity, under subtraction*)
 
 lemma norm_dist_1 : 
@@ -62,15 +57,18 @@ norm (x + y) r r' = ((norm x r r') + (norm y r r')) - fst r'"
   by (simp add: add_divide_distrib ring_class.ring_distribs(2))
 
 
+consts inRanges :: "(real \<times> real) list"
+       outRanges :: "(real \<times> real) list"
+       annRange :: "(real \<times> real)"
 
-definition inRanges :: "(real \<times> real) list" where
-"inRanges = [(-30,30), (-250,250)]" 
+definition inRanges_ex :: "(real \<times> real) list" where
+"inRanges_ex = [(-30,30), (-250,250)]" 
 
-definition outRanges :: "(real \<times> real) list" where
-"outRanges = [(-1950, 1950)]" 
+definition outRanges_ex :: "(real \<times> real) list" where
+"outRanges_ex = [(-1950, 1950)]" 
 
-definition annRange :: "(real \<times> real)" where
-"annRange = (0,1)" 
+definition annRange_ex :: "(real \<times> real)" where
+"annRange_ex = (0,1)" 
 
 fun normSeq :: "real list \<Rightarrow> (real \<times> real) list \<Rightarrow> (real \<times> real) list \<Rightarrow> real list" where
 "normSeq [] oldranges newranges = []" |
@@ -108,45 +106,21 @@ definition denormOut :: "nat \<Rightarrow> real \<Rightarrow> real" where
 definition epsilon_marabou :: "real" where 
 "epsilon_marabou = ( (denormOut 1 0.017 ) - (outRanges(1).1) )"
 
-value "epsilon_marabou"
 
-
-lemma 
-  fixes i :: "nat"
-  assumes "x \<ge> 0 \<and> x \<le> 1"
-  shows "\<forall> i \<in> {1,2}. normIn i (denormIn i x) = x"  
-  apply (simp add: normIn_def denormIn_def annRange_def outRanges_def)
-  apply (rule conjI)
-   apply (rule norm_lem_1)
-   apply (simp add: inRanges_def annRange_def)
-  apply (simp add: annRange_def inRanges_def norm_lem_1)
+lemma
+  fixes i :: "nat" and x :: "real"
+  assumes "\<forall> i . snd(outRanges ! i) > fst(outRanges ! i) \<and> snd(annRange) > fst(annRange)"
+  shows "normOut i (denormOut i x) = x" unfolding denormOut_def normOut_def
+  apply (simp add: assms norm_lem_1)
   done
 
-lemma 
-  fixes i :: "nat"
-  assumes "i \<le> 2" and "x \<ge> -30 \<and> x \<le> 30"
-  shows "\<forall> i \<in> {1,2}. denormIn i (normIn i x) = x"  
-  apply (simp add: normIn_def denormIn_def )
-  apply (rule conjI)
-   apply (rule norm_lem_1)
-   apply (simp add: inRanges_def annRange_def)
-  apply (simp add: annRange_def inRanges_def norm_lem_1)
+lemma
+  fixes i :: "nat" and x :: "real"
+  assumes "\<forall> i . snd(inRanges ! i) > fst(inRanges ! i) \<and> snd(annRange) > fst(annRange)"
+  shows "normIn i (denormIn i x) = x" unfolding denormIn_def normIn_def
+  apply (simp add: assms norm_lem_1)
   done
-  
-  
 
-lemma norm_denorm_in:
-  fixes x::"real"
-  assumes "x \<ge> 0 \<and> x \<le> 1"
-  shows "\<forall> i \<in> {1,2}. normIn i (denormIn i x) = denormIn i (normIn i x)"
-  by (simp add: annRange_def inRanges_def denormIn_def normIn_def norm_lem_1 nth_Cons_0)
-
-
-lemma norm_deoutRanges:
-  fixes x::"real"
-  assumes "x \<ge> 0 \<and> x \<le> 1"
-  shows "\<forall> i \<in> {1}. normOut i (denormOut i x) = denormOut i (normOut i x)"
-  by (simp add: annRange_def outRanges_def denormOut_def normOut_def norm_lem_1)
 
 consts input :: "ann_ch list"
 consts p :: "(real list \<times> real list) \<Rightarrow> bool"
