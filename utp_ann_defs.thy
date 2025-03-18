@@ -1,4 +1,4 @@
-theory UTP_ANN_Defs
+theory utp_ann_defs
   imports 
     "conf" 
 begin   

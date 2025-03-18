@@ -1,4 +1,4 @@
-theory UTPANN_Proofs
+theory utp_ann_proof
   imports 
     "UTP_ANN_Defs"
 begin   
