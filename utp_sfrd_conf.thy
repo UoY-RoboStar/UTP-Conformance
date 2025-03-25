@@ -39,6 +39,19 @@ definition set_approx :: "real \<Rightarrow> real set \<Rightarrow> (real set) s
 text \<open> We are treating the process alphabet as a constant for now, but see utp_sfrd_alpha for in-development work
        on a real process alphabet operator.  \<close>
 
+term "(tr\<^sup>> - tr\<^sup><)\<^sub>e"
+
+typ "('e, 's) caction"
+
+definition process_events :: "('e, 's) caction \<Rightarrow> 'e set" where
+[pred]: "process_events P = \<Union> ((set (tr\<^sup>> - tr\<^sup><))\<^sub>e ` Collect P)"
+
+lemma process_events_nil: "process_events (tr\<^sup>> = tr\<^sup><)\<^sub>e = {}"
+  by (pred_simp)
+
+lemma process_events_single: "process_events (tr\<^sup>> = tr\<^sup>< @ [\<guillemotleft>a\<guillemotright>])\<^sub>e = {a}"
+  by (pred_simp)
+
 consts process_alpha :: "('e, 's) caction \<Rightarrow> 'e set" ("\<alpha>_") 
 
 definition Approx :: "real \<Rightarrow> ('b \<times> real \<Longrightarrow>\<^sub>\<triangle> 'e) \<Rightarrow> ('e, 's) caction \<Rightarrow> ('e, 's) caction" where
