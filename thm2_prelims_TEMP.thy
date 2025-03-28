@@ -49,17 +49,17 @@ definition norm :: "real \<Rightarrow> (real \<times> real) \<Rightarrow> (real 
 "norm val oldrange newrange = (((val - fst(oldrange)) / (snd(oldrange) - fst(oldrange))) 
                               * (snd(newrange) - fst(newrange))) + fst(newrange) "
 
-definition normIn :: "nat \<Rightarrow> real \<Rightarrow> real" where
-"normIn i x = (norm x (inRanges(i)) annRange)"
+definition normI :: "nat \<Rightarrow> real \<Rightarrow> real" where
+"normI i x = (norm x (inRanges(i)) annRange)"
 
-definition normOut :: "nat \<Rightarrow> real \<Rightarrow> real" where
-"normOut i x = (norm x (outRanges(i)) annRange)"
+definition normO :: "nat \<Rightarrow> real \<Rightarrow> real" where
+"normO i x = (norm x (outRanges(i)) annRange)"
 
-definition denormIn :: "nat \<Rightarrow> real \<Rightarrow> real" where
-"denormIn i x = (norm x annRange (inRanges(i)))"
+definition denormI :: "nat \<Rightarrow> real \<Rightarrow> real" where
+"denormI i x = (norm x annRange (inRanges(i)))"
 
-definition denormOut :: "nat \<Rightarrow> real \<Rightarrow> real" where
-"denormOut i x = (norm x annRange (outRanges(i)))"
+definition denormO :: "nat \<Rightarrow> real \<Rightarrow> real" where
+"denormO i x = (norm x annRange (outRanges(i)))"
 
 text \<open> Lemma 1 mechanisation \<close>
 
@@ -79,7 +79,14 @@ text \<open> Lemma 3 mechanisation \<close>
 lemma output_norm:
   fixes i :: "nat" and x :: "real"
   assumes "\<forall> i . snd(outRanges ! i) > fst(outRanges ! i) \<and> snd(annRange) > fst(annRange)"
-  shows "normOut i (denormOut i x) = x" unfolding denormOut_def normOut_def
+  shows "normO i (denormO i x) = x" unfolding denormO_def normO_def
+  apply (simp add: assms norm_lem_1)
+  done
+
+lemma output_norm_2:
+  fixes i :: "nat" and x :: "real"
+  assumes "\<forall> i . snd(outRanges ! i) > fst(outRanges ! i) \<and> snd(annRange) > fst(annRange)"
+  shows "denormO i (normO i x) = x" unfolding denormO_def normO_def
   apply (simp add: assms norm_lem_1)
   done
 
@@ -88,7 +95,7 @@ text \<open> Lemma 4 mechanisation \<close>
 lemma input_norm:
   fixes i :: "nat" and x :: "real"
   assumes "\<forall> i . snd(inRanges ! i) > fst(inRanges ! i) \<and> snd(annRange) > fst(annRange)"
-  shows "normIn i (denormIn i x) = x" unfolding denormIn_def normIn_def
+  shows "normI i (denormI i x) = x" unfolding denormI_def normI_def
   apply (simp add: assms norm_lem_1)
   done
 

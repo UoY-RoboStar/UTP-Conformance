@@ -8,11 +8,11 @@ definition prism_filter :: "('a \<Longrightarrow>\<^sub>\<triangle> 'c) \<Righta
 definition prism_filter_prod :: "('b \<times> 'a \<Longrightarrow>\<^sub>\<triangle> 'c) \<Rightarrow> 'c list \<Rightarrow> 'a list" where
 "prism_filter_prod c t = map (snd \<circ> the \<circ> match\<^bsub>c\<^esub>) (filter matches\<^bsub>c\<^esub> t)"
 
+definition prism_filter_set:: "('a \<Longrightarrow>\<^sub>\<triangle> 'c) \<Rightarrow> 'c set \<Rightarrow> 'a set" where
+"prism_filter_set c s = {(the \<circ> match\<^bsub>c\<^esub>) x | x. x \<in> s \<and> (matches\<^bsub>c\<^esub> x) }"
 
 (*prism_filter defined for sets? Set comprehension? *)
 
-(**)
-term "snd  "
 definition prism_filter_prod_set :: "('b \<times> 'a \<Longrightarrow>\<^sub>\<triangle> 'c) \<Rightarrow> 'c set \<Rightarrow> 'a set" where
 "prism_filter_prod_set c s = {(snd \<circ> the \<circ> match\<^bsub>c\<^esub>) x | x. x \<in> s \<and> (matches\<^bsub>c\<^esub> x) }"
 

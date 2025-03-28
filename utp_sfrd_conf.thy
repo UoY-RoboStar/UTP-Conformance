@@ -60,8 +60,22 @@ definition Approx :: "real \<Rightarrow> ('b \<times> real \<Longrightarrow>\<^s
                (prism_filter_prod_set \<guillemotleft>tc\<guillemotright> a) \<in> (set_approx (\<guillemotleft>eps\<guillemotright>) (prism_filter_prod_set \<guillemotleft>tc\<guillemotright> (((\<alpha> \<guillemotleft>P\<guillemotright>) - ($ref\<^sup>>)))))
                )\<^sub>e"
 
+(*Conformance with a single real valued channel*)
+definition Approx_sin :: "real \<Rightarrow> (real \<Longrightarrow>\<^sub>\<triangle> 'e) \<Rightarrow> ('e, 's) caction \<Rightarrow> ('e, 's) caction" where
+"Approx_sin eps tc P = R3c(\<exists> t. \<exists> a. P\<lbrakk>\<guillemotleft>t\<guillemotright>, ((\<alpha> \<guillemotleft>P\<guillemotright>) - \<guillemotleft>a\<guillemotright>)/tr\<^sup>>, ref\<^sup>>\<rbrakk> \<and>
+               (prism_filter \<guillemotleft>tc\<guillemotright> (tr\<^sup>> - tr\<^sup><)) \<in> seq_approx (\<guillemotleft>eps\<guillemotright>) (prism_filter \<guillemotleft>tc\<guillemotright> (\<guillemotleft>t\<guillemotright> - tr\<^sup><)) \<and>
+               (prism_filter_set \<guillemotleft>tc\<guillemotright> a) \<in> (set_approx (\<guillemotleft>eps\<guillemotright>) (prism_filter_set \<guillemotleft>tc\<guillemotright> (((\<alpha> \<guillemotleft>P\<guillemotright>) - ($ref\<^sup>>)))))
+               )\<^sub>e"
+
+(*This is conformance where the type of the prism has a product type, using prism_filter_prod. *)
 definition conf :: "real \<Rightarrow> ('b \<times> real \<Longrightarrow>\<^sub>\<triangle> 'e) \<Rightarrow> ('e, 's) caction \<Rightarrow> ('e, 's) caction \<Rightarrow> bool" where
 "conf eps tc P Q =  (eps \<ge> 0 \<longrightarrow> ((Approx(eps)(tc)(Q) \<sqsubseteq> P)))"
+
+(*Conformance singular channel type: *)
+definition conf_sin :: "real \<Rightarrow> (real \<Longrightarrow>\<^sub>\<triangle> 'e) \<Rightarrow> ('e, 's) caction \<Rightarrow> ('e, 's) caction \<Rightarrow> bool" where
+"conf_sin eps tc P Q =  (eps \<ge> 0 \<longrightarrow> ((Approx_sin(eps)(tc)(Q) \<sqsubseteq> P)))"
+
+
 
 text \<open> The definition cconf is a conformance shorthand, where we fix the channel types to inp and out, which 
        corresponds to conformance for ANN controllers and patterns of cyclic controllers specifically. \<close>
