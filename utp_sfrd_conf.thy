@@ -31,40 +31,15 @@ definition seq_approx :: "real \<Rightarrow> real list \<Rightarrow> real list s
 "seq_approx eps xs = {ys | ys. (#ys = #xs) \<and> (\<forall> i \<in> {1..#xs}. 
                      (ys::real list)(i) \<in> (approx (eps) (xs(i)))) }"
 
-definition set_approx :: "real \<Rightarrow> real set \<Rightarrow> (real set) set" where
-"set_approx eps xs = {ys | ys. (#ys = #xs) \<and> 
-                (\<forall> e \<in> ys. \<exists> e1 \<in> xs.  
-                (e \<in> approx eps e1 ))}"
-
-text \<open> We are treating the process alphabet as a constant for now, but see utp_sfrd_alpha for in-development work
-       on a real process alphabet operator.  \<close>
-
-term "(tr\<^sup>> - tr\<^sup><)\<^sub>e"
-
-typ "('e, 's) caction"
-
-definition process_events :: "('e, 's) caction \<Rightarrow> 'e set" where
-[pred]: "process_events P = \<Union> ((set (tr\<^sup>> - tr\<^sup><))\<^sub>e ` Collect P)"
-
-lemma process_events_nil: "process_events (tr\<^sup>> = tr\<^sup><)\<^sub>e = {}"
-  by (pred_simp)
-
-lemma process_events_single: "process_events (tr\<^sup>> = tr\<^sup>< @ [\<guillemotleft>a\<guillemotright>])\<^sub>e = {a}"
-  by (pred_simp)
-
-consts process_alpha :: "('e, 's) caction \<Rightarrow> 'e set" ("\<alpha>_") 
-
 definition Approx :: "real \<Rightarrow> ('b \<times> real \<Longrightarrow>\<^sub>\<triangle> 'e) \<Rightarrow> ('e, 's) caction \<Rightarrow> ('e, 's) caction" where
-"Approx eps tc P = R3c(\<exists> t. \<exists> a. P\<lbrakk>\<guillemotleft>t\<guillemotright>, ((\<alpha> \<guillemotleft>P\<guillemotright>) - \<guillemotleft>a\<guillemotright>)/tr\<^sup>>, ref\<^sup>>\<rbrakk> \<and>
-               (prism_filter_prod \<guillemotleft>tc\<guillemotright> (tr\<^sup>> - tr\<^sup><)) \<in> seq_approx (\<guillemotleft>eps\<guillemotright>) (prism_filter_prod \<guillemotleft>tc\<guillemotright> (\<guillemotleft>t\<guillemotright> - tr\<^sup><)) \<and>
-               (prism_filter_prod_set \<guillemotleft>tc\<guillemotright> a) \<in> (set_approx (\<guillemotleft>eps\<guillemotright>) (prism_filter_prod_set \<guillemotleft>tc\<guillemotright> (((\<alpha> \<guillemotleft>P\<guillemotright>) - ($ref\<^sup>>)))))
+"Approx eps tc P = R3c(\<exists> t. P\<lbrakk>\<guillemotleft>t\<guillemotright> /tr\<^sup>>\<rbrakk> \<and>
+               (prism_filter_prod \<guillemotleft>tc\<guillemotright> (tr\<^sup>> - tr\<^sup><)) \<in> seq_approx (\<guillemotleft>eps\<guillemotright>) (prism_filter_prod \<guillemotleft>tc\<guillemotright> (\<guillemotleft>t\<guillemotright> - tr\<^sup><))
                )\<^sub>e"
 
 (*Conformance with a single real valued channel*)
 definition Approx_sin :: "real \<Rightarrow> (real \<Longrightarrow>\<^sub>\<triangle> 'e) \<Rightarrow> ('e, 's) caction \<Rightarrow> ('e, 's) caction" where
-"Approx_sin eps tc P = R3c(\<exists> t. \<exists> a. P\<lbrakk>\<guillemotleft>t\<guillemotright>, ((\<alpha> \<guillemotleft>P\<guillemotright>) - \<guillemotleft>a\<guillemotright>)/tr\<^sup>>, ref\<^sup>>\<rbrakk> \<and>
-               (prism_filter \<guillemotleft>tc\<guillemotright> (tr\<^sup>> - tr\<^sup><)) \<in> seq_approx (\<guillemotleft>eps\<guillemotright>) (prism_filter \<guillemotleft>tc\<guillemotright> (\<guillemotleft>t\<guillemotright> - tr\<^sup><)) \<and>
-               (prism_filter_set \<guillemotleft>tc\<guillemotright> a) \<in> (set_approx (\<guillemotleft>eps\<guillemotright>) (prism_filter_set \<guillemotleft>tc\<guillemotright> (((\<alpha> \<guillemotleft>P\<guillemotright>) - ($ref\<^sup>>)))))
+"Approx_sin eps tc P = R3c(\<exists> t. P\<lbrakk>\<guillemotleft>t\<guillemotright> /tr\<^sup>> \<rbrakk> \<and>
+               (prism_filter \<guillemotleft>tc\<guillemotright> (tr\<^sup>> - tr\<^sup><)) \<in> seq_approx (\<guillemotleft>eps\<guillemotright>) (prism_filter \<guillemotleft>tc\<guillemotright> (\<guillemotleft>t\<guillemotright> - tr\<^sup><))
                )\<^sub>e"
 
 (*This is conformance where the type of the prism has a product type, using prism_filter_prod. *)
@@ -119,13 +94,6 @@ lemma seq_approx_mem :
   shows "xs \<in> seq_approx eps xs" 
   apply (simp add: seq_approx_def approx_def assms)
   done
-text \<open> Modified Lemma 4.2 for set approximation \<close>
-lemma set_approx_mem : 
-  fixes eps::"real"
-  assumes "eps \<ge> 0"
-  shows "xs \<in> set_approx eps xs" 
-  unfolding set_approx_def approx_def
-  using assms by force
 
 
 end

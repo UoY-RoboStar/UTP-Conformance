@@ -1,6 +1,9 @@
 section \<open> UTP Process Alphabets \<close>
 text \<open> This is a mechanisation of an alphabet command in UTP. We need this because we are working with the acceptances
-in conformance. This is an in-development file and needs more review.  \<close>
+in conformance. This is an in-development file and needs more review. 
+
+This also contains the work on process traces, and work for mechanising the refusals (acceptances) with 
+conformance, for review later.  \<close>
 
 theory utp_sfrd_alpha
   imports 
@@ -20,6 +23,34 @@ type_synonym ('e, 's) caction = "('s, 'e) sfrd hrel"
 
 text \<open> This is needed as we use the UTP overloaded Logic Syntax \<close>
 unbundle UTP_Logic_Syntax 
+
+subsection \<open> Process event extraction work: \<close>
+
+definition set_approx :: "real \<Rightarrow> real set \<Rightarrow> (real set) set" where
+"set_approx eps xs = {ys | ys. (#ys = #xs) \<and> 
+                (\<forall> e \<in> ys. \<exists> e1 \<in> xs.  
+                (e \<in> approx eps e1 ))}"
+
+
+text \<open> We are treating the process alphabet as a constant for now, but see utp_sfrd_alpha for in-development work
+       on a real process alphabet operator.  \<close>
+
+term "(tr\<^sup>> - tr\<^sup><)\<^sub>e"
+
+typ "('e, 's) caction"
+
+definition process_events :: "('e, 's) caction \<Rightarrow> 'e set" where
+[pred]: "process_events P = \<Union> ((set (tr\<^sup>> - tr\<^sup><))\<^sub>e ` Collect P)"
+
+lemma process_events_nil: "process_events (tr\<^sup>> = tr\<^sup><)\<^sub>e = {}"
+  by (pred_simp)
+
+lemma process_events_single: "process_events (tr\<^sup>> = tr\<^sup>< @ [\<guillemotleft>a\<guillemotright>])\<^sub>e = {a}"
+  by (pred_simp)
+
+consts process_alpha :: "('e, 's) caction \<Rightarrow> 'e set" ("\<alpha>_") 
+
+
 
 subsection \<open> Definitions \<close>
 
