@@ -69,6 +69,19 @@ lemma mono_norm:
   apply (simp add: norm_def)
   by (simp add: assms divide_strict_right_mono)
 
+lemma mono_normO: 
+  assumes "(snd(outRanges ! 0) > fst(outRanges ! 0) \<and> snd(annRange) > fst(annRange))"
+  shows "x < y \<Longrightarrow> (normO 1 x)  < (normO 1 y)"
+  using assms apply (simp add: normO_def mono_norm)
+  done
+
+lemma mono_denormO: 
+  assumes "(snd(outRanges ! 0) > fst(outRanges ! 0) \<and> snd(annRange) > fst(annRange))"
+  shows "x < y \<Longrightarrow> (denormO 1 x)  < (denormO 1 y)"
+  using assms apply (simp add: denormO_def mono_norm)
+  done
+  
+
 text \<open> Lemma 2 mechanisation \<close>
 
 lemma norm_lem_1: "(snd(r) > fst(r) \<and> snd(r') > fst(r'))
