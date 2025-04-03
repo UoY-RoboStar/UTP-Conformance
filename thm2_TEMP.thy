@@ -35,24 +35,11 @@ consts P :: "real"
 theorem conf_vcs:
 assumes "\<epsilon> \<ge> 0" and 
   "\<And> x_1 x_2 :: real. \<And> y_1 :: real. 
-
       (y_1 = (P * x_1) + (D * x_2)) \<longrightarrow>
              \<bar>(denormO 1 (annout 2 1 [(normI 1 x_1), (normI 2 x_2)]) ) - y_1 \<bar> \<le> \<epsilon>"
 shows "(conf_sin \<epsilon> angleOutputE AnglePIDANN AnglePID_C)"
   sorry
 
-
-
-(*ULTIMATE GOAL: *)
-
-term "(\<And> x_1 x_2.
-          (x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
-          x_1 \<le> normI 1 (inRanges(1).2) \<and>
-          x_2 \<ge> normI 2 (inRanges(2).1) \<and>
-          x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow> 
-          \<not> (annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon> + \<delta> \<and>
-          annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon> - \<delta> )
-         ))"
 
 (*Needs to be implication, back to paper: *)
 notepad
@@ -71,62 +58,55 @@ begin
   We want this statement, to be FALSE AT THE BEGINNING, THIS IS WHAT WE WANT, if Marabou doesn't tell us this, 
 we have a problem. 
  *)
-  have "(x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
+  (*MARABOU 1: *)
+  have m1: "x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
           x_1 \<le> normI 1 (inRanges(1).2) \<and>
           x_2 \<ge> normI 2 (inRanges(2).1) \<and>
           x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
-          \<not> annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon> + \<delta>
-          )
-           \<and>
-          (x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
+          \<not> annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>
+          " by sorry
+  have m2: "x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
           x_1 \<le> normI 1 (inRanges(1).2) \<and>
           x_2 \<ge> normI 2 (inRanges(2).1) \<and>
           x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
-          \<not> annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon> - \<delta> )"
+          \<not> annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>"
     by sorry
-  have "... \<longrightarrow> 
-          x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
+  (*The implication, is the new line, is the separation between INPUT AND OUTPUT*)
+  (*Have two separate conditions, then see if we can provve *)
+  (*THIS IS THE ACTUAL CONDITIONS, *)
+  from m1 m2 have m3: "x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
           x_1 \<le> normI 1 (inRanges(1).2) \<and>
           x_2 \<ge> normI 2 (inRanges(2).1) \<and>
           x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
       
-          (\<not> annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon> + \<delta>)
+          (\<not> annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>)
            \<and>
-          (\<not> annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon> - \<delta>)"
-    using \<open>(normI 1 (fst (inRanges(1)\<^sub>s)) \<le> x_1 \<and> x_1 \<le> normI 1 (snd (inRanges(1)\<^sub>s)) \<and> normI 2 (fst (inRanges(2)\<^sub>s)) \<le> x_2 \<and> x_2 \<le> normI 2 (snd (inRanges(2)\<^sub>s)) \<longrightarrow> \<not> normO 1 (denormI 1 (normI 1 (fst (inRanges(1)\<^sub>s)) * P) + denormI 2 (normI 2 (fst (inRanges(2)\<^sub>s))) * D) + \<epsilon> + \<delta> \<le> annout 2 1 [x_1, x_2]) \<and> (normI 1 (fst (inRanges(1)\<^sub>s)) \<le> x_1 \<and> x_1 \<le> normI 1 (snd (inRanges(1)\<^sub>s)) \<and> normI 2 (fst (inRanges(2)\<^sub>s)) \<le> x_2 \<and> x_2 \<le> normI 2 (snd (inRanges(2)\<^sub>s)) \<longrightarrow> \<not> annout 2 1 [x_1, x_2] \<le> normO 1 (denormI 1 (normI 1 (snd (inRanges(1)\<^sub>s)) * P) + denormI 2 (normI 2 (snd (inRanges(2)\<^sub>s))) * D) - \<epsilon> - \<delta>)\<close> by fastforce
+          (\<not> annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>)"
+    by auto
     
-    assume "x_1 \<ge> normI 1 (inRanges(1).1) \<and>
+  (*We get this from our assumptions. *)
+    assume a1: "x_1 \<ge> normI 1 (inRanges(1).1) \<and>
           x_1 \<le> normI 1 (inRanges(1).2) \<and>
           x_2 \<ge> normI 2 (inRanges(2).1) \<and>
           x_2 \<le> normI 2 (inRanges(2).2)"
-  then have "... \<longrightarrow> 
-    (\<not> annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon> + \<delta>)
+  from a1 m3 have "
+    (\<not> annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>)
      \<and>
-    (\<not> annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon> - \<delta>)"
-    using \<open>(normI 1 (fst (inRanges(1)\<^sub>s)) \<le> x_1 \<and> x_1 \<le> normI 1 (snd (inRanges(1)\<^sub>s)) \<and> normI 2 (fst (inRanges(2)\<^sub>s)) \<le> x_2 \<and> x_2 \<le> normI 2 (snd (inRanges(2)\<^sub>s)) \<longrightarrow> \<not> normO 1 (denormI 1 (normI 1 (fst (inRanges(1)\<^sub>s)) * P) + denormI 2 (normI 2 (fst (inRanges(2)\<^sub>s))) * D) + \<epsilon> + \<delta> \<le> annout 2 1 [x_1, x_2]) \<and> (normI 1 (fst (inRanges(1)\<^sub>s)) \<le> x_1 \<and> x_1 \<le> normI 1 (snd (inRanges(1)\<^sub>s)) \<and> normI 2 (fst (inRanges(2)\<^sub>s)) \<le> x_2 \<and> x_2 \<le> normI 2 (snd (inRanges(2)\<^sub>s)) \<longrightarrow> \<not> annout 2 1 [x_1, x_2] \<le> normO 1 (denormI 1 (normI 1 (snd (inRanges(1)\<^sub>s)) * P) + denormI 2 (normI 2 (snd (inRanges(2)\<^sub>s))) * D) - \<epsilon> - \<delta>)\<close> by blast
-    
-   (*we will get rid of these with our assumptions, which will be implicit in the proof: *)
-  (*We want this to be false so: *)
-
-  have "... \<longrightarrow> 
-   (annout 2 1 [x_1, x_2] < (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon> + \<delta>)
-     \<and>
-    (annout 2 1 [x_1, x_2] > (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon> - \<delta>)"
+    (\<not> annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>)"
     by auto
-  (*ANN function is not, in fact, monotonic, but, this works, because this is bounds on the SPEC FUNCTION, THAT IS MONOTONIC. *)
-  (*ANN function is TESTED AT EVERY FIXED X_1, within limits, thats why we don't need monotonicity 
-  of the ANN function, it is evaluated at every x_1 and x_2, tested with SMT solvers, so we don't need it to be. 
-  We do need the spec function to be, because, it is the one being tested. *)
-  have "... \<longrightarrow>
+
+
+  have "... = 
+   (annout 2 1 [x_1, x_2] < (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>)
+     \<and>
+    (annout 2 1 [x_1, x_2] > (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>)"
+    using a1 m3 by linarith
+
+   have "... \<longrightarrow>
    (annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>)
      \<and>
     (annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>)"
-    using 
-(*Why doesn't this work ? monotonic, need ann function to be monotonic. *)
-  
-    
-   
-
+     using a1 m1 by linarith
 
    
   
@@ -143,56 +123,84 @@ lemma "\<And> x_1 :: real.
   quickcheck
   sorry
 
+
 theorem controller_conformance_manual:
   assumes 
-    "\<epsilon> \<ge> 0" and 
-    "\<forall> i . snd(outRanges ! i) > fst(outRanges ! i) \<and> snd(annRange) > fst(annRange)"
-  
-shows "
-      \<And> x_1 x_2 :: real. (x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
+
+    (*Assumption on epsilon*)
+    "\<epsilon> \<ge> 0" and
+
+    (*Assumptions on the normalisation, that the ranges are well-formed*)
+    "\<forall> i . snd(outRanges ! i) > fst(outRanges ! i) \<and> snd(annRange) > fst(annRange)" and
+    (*The assumption on the range of the variables, we need this to make the proof cleaner: *) 
+    "\<And> x_1 x_2. x_1 \<ge> normI 1 (inRanges(1).1) \<and>
           x_1 \<le> normI 1 (inRanges(1).2) \<and>
           x_2 \<ge> normI 2 (inRanges(2).1) \<and>
-          x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow> 
-          \<not> (annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon> + \<delta> \<and>
-          annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon> - \<delta> )
-         ) \<Longrightarrow> (conf_sin \<epsilon> angleOutputE AnglePIDANN AnglePID_C)" 
+          x_2 \<le> normI 2 (inRanges(2).2)" and
+  
+    (*Marabou, these are the actual assumption discharged by Marabou: *)
+    "\<And> x_1 x_2. x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
+          x_1 \<le> normI 1 (inRanges(1).2) \<and>
+          x_2 \<ge> normI 2 (inRanges(2).1) \<and>
+          x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
+          \<not> annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>
+          " and
+    "\<And> x_1 x_2. x_1 \<ge> normI 1 (inRanges(1).1) \<and>
+          x_1 \<le> normI 1 (inRanges(1).2) \<and>
+          x_2 \<ge> normI 2 (inRanges(2).1) \<and>
+          x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
+          \<not> annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>"
+     
+    
+shows "(conf_sin \<epsilon> angleOutputE AnglePIDANN AnglePID_C)" 
   apply (rule conf_vcs)
   (*Discharge first assumption: *)
-  apply (simp add: assms)
+   apply (simp add: assms(1))
 
-(*Even though different names, if we have some fixed variables, show this
-
-IT WORKS, IT STILL WORKS: *)
 proof - 
   (*Start with some fixed variables, we have no assumptions about them here: *)
   fix x_1 x_2 y_1 :: real
-
-  (*Going to do forwards reasoning, makes the most sense here: *)
-  (*Chain of equality and implication, to get to our goal: *)
-  (*Add our assumptions here perhaps: *)
-  (*This is the MARABOU PREDICATE: *)
-  have "(x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
+  from assms(4) assms(5) have m3: "x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
           x_1 \<le> normI 1 (inRanges(1).2) \<and>
           x_2 \<ge> normI 2 (inRanges(2).1) \<and>
-          x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow> 
-          \<not> (annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon> + \<delta> \<and>
-          annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon> - \<delta> )
-         )" by sorry (*WILL BE MARABOU: *)
+          x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
+      
+          (\<not> annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>)
+           \<and>
+          (\<not> annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>)"
+    by auto
 
-  have "(x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
-          x_1 \<le> normI 1 (inRanges(1).2) \<and>
-          x_2 \<ge> normI 2 (inRanges(2).1) \<and>
-          x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow> 
-          \<not> (annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon> + \<delta> \<and>
-          annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon> - \<delta> )
-         ) = undefined"
+  from assms(3) m3 have "
+    (\<not> annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>)
+     \<and>
+    (\<not> annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>)"
+    by auto
+
+
+  have "... = 
+   (annout 2 1 [x_1, x_2] < (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>)
+     \<and>
+    (annout 2 1 [x_1, x_2] > (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>)"
+    by (meson assms(3) gt_ex linorder_not_less)
+    
+   have "... \<longrightarrow>
+   (annout 2 1 [x_1, x_2] \<le> (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) ))) + \<epsilon>)
+     \<and>
+    (annout 2 1 [x_1, x_2] \<ge> (normO 1 ((denormI 1 (normI 1 (inRanges(1).2) * P) + (denormI 2 (normI 2 (inRanges(2).2)) * D) ))) - \<epsilon>)"
+     by (smt (z3) assms(3))
   
+   have "... = 
+    (\<bar>annout 2 1 [x_1, x_2] -
+       (normO 1 ((denormI 1 (normI 1 (inRanges(1).1) * P) + (denormI 2 (normI 2 (inRanges(2).1)) * D) )))\<bar>
+     \<le> \<epsilon>)"
+     by (meson assms(3) gt_ex linorder_not_less)
 
-  (*Then we derive our goal from this: *)
+   (********************************)
 
   (*This is the ultimate goal: *)
   show "y_1 = P * x_1 + D * x_2 \<longrightarrow> \<bar>denormO 1 (annout 2 1 [normI 1 x_1, normI 2 x_2]) - y_1\<bar> \<le> \<epsilon>" by sorry
 qed
+
 
   show "(y_1 = (P *x_1) + (D * x_2)) \<and> 
           normI 1 (fst (inRanges(1)\<^sub>s)) \<le> x_1 \<and>
