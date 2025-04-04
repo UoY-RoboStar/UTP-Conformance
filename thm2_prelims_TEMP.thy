@@ -41,6 +41,11 @@ text \<open> These are the definitions of the functions and constants we need to
 
 text \<open> Definition 4 mechanisation (from report) \<close>
 
+locale thm2 =
+  fixes inRanges :: "(real \<times> real) list"
+  and outRanges :: "(real \<times> real) list"
+  and annRange :: "(real \<times> real)"
+
 consts inRanges :: "(real \<times> real) list"
        outRanges :: "(real \<times> real) list"
        annRange :: "(real \<times> real)"
@@ -70,16 +75,29 @@ lemma mono_norm:
   by (simp add: assms divide_strict_right_mono)
 
 lemma mono_normO: 
-  assumes "(snd(outRanges ! 0) > fst(outRanges ! 0) \<and> snd(annRange) > fst(annRange))"
-  shows "x < y \<Longrightarrow> (normO 1 x)  < (normO 1 y)"
+  assumes "(snd(outRanges(n)) > fst(outRanges(n)) \<and> snd(annRange) > fst(annRange))"
+  shows "x < y \<Longrightarrow> (normO n x)  < (normO n y)"
   using assms apply (simp add: normO_def mono_norm)
   done
 
+lemma mono_normI: 
+  assumes "(snd(inRanges(n)) > fst(inRanges(n)) \<and> snd(annRange) > fst(annRange))"
+  shows "x < y \<Longrightarrow> (normI n x)  < (normI n y)"
+  using assms apply (simp add: normI_def mono_norm)
+  done
+
 lemma mono_denormO: 
-  assumes "(snd(outRanges ! 0) > fst(outRanges ! 0) \<and> snd(annRange) > fst(annRange))"
-  shows "x < y \<Longrightarrow> (denormO 1 x)  < (denormO 1 y)"
+  assumes "(snd(outRanges(n)) > fst(outRanges(n)) \<and> snd(annRange) > fst(annRange))"
+  shows "x < y \<Longrightarrow> (denormO n x)  < (denormO n y)"
   using assms apply (simp add: denormO_def mono_norm)
   done
+
+lemma mono_denormI: 
+  assumes "(snd(inRanges(n)) > fst(inRanges(n)) \<and> snd(annRange) > fst(annRange))"
+  shows "x < y \<Longrightarrow> (denormI n x)  < (denormI n y)"
+  using assms apply (simp add: denormI_def mono_norm)
+  done
+  
   
 
 text \<open> Lemma 2 mechanisation \<close>
@@ -109,6 +127,14 @@ lemma input_norm:
   fixes i :: "nat" and x :: "real"
   assumes "\<forall> i . snd(inRanges ! i) > fst(inRanges ! i) \<and> snd(annRange) > fst(annRange)"
   shows "normI i (denormI i x) = x" unfolding denormI_def normI_def
+  apply (simp add: assms norm_lem_1)
+  done
+
+
+lemma input_norm2:
+  fixes i :: "nat" and x :: "real"
+  assumes "\<forall> i . snd(inRanges ! i) > fst(inRanges ! i) \<and> snd(annRange) > fst(annRange)"
+  shows "denormI i (normI i x) = x" unfolding denormI_def normI_def
   apply (simp add: assms norm_lem_1)
   done
 
