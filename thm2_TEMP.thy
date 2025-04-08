@@ -48,7 +48,6 @@ shows "(conf_sin \<epsilon> angleOutputE AnglePIDANN AnglePID_C)"
 definition spec_f :: "real \<Rightarrow> real \<Rightarrow> real" where
 "spec_f x_1 x_2 = (P * x_1) + (D * x_2)"
 
-
 definition norm_spec_f :: "real \<Rightarrow> real \<Rightarrow> real" where 
 "norm_spec_f x_1 x_2 = (denormI 1 (x_1 * P) + (denormI 2 (x_2 * D) ))"
 
@@ -90,6 +89,7 @@ definition int :: "(real \<times> real) list" where
          ((normI 2 (inRanges(2).1)), ((normI 2 (inRanges(2).2)))) ]"
 term "#int"
 
+
 (*Using FST for MIN and SND for MAX, when encoding the intervals. *)
 term "fst(int(1))"
 term "fst(int(2))"
@@ -99,8 +99,6 @@ term "snd(int(2))"
 (*Abbreviation for readability, referring to the f_ann as annout 2 1 to correspond 
 to the last layer of our example: *)
 abbreviation "f_ann x y \<equiv> annout 2 1 [x,y]"
-
-
 
 lemma spec_mono_ann:
   fixes x_1 x_2 y_1 y_2 :: real and S :: "real \<Rightarrow> real \<Rightarrow> real"
@@ -156,28 +154,38 @@ proof (rule conjI)
     using \<open>x_1 \<le> snd (thm2_TEMP.int(1)\<^sub>s) \<and> x_2 \<le> snd (thm2_TEMP.int(2)\<^sub>s)\<close> \<open>x_2 \<le> snd (thm2_TEMP.int(2)\<^sub>s) \<longrightarrow> S x_1 x_2 \<le> S (snd (thm2_TEMP.int(1)\<^sub>s)) (snd (thm2_TEMP.int(2)\<^sub>s))\<close> by linarith
 qed
 
+(*Marabou combined results: *)
 
-lemma marabou_results_lemma_1: 
+(*This assumes that Marabou returns UNSAT, as is the desired result. 
+If Marabou returns SAT, a counterexample, currently, we will choose another epsilon
+such that this holds. *)
+
+lemma marabou_combined_results: 
   fixes x1 x2 :: real
-  shows "x1 \<ge> normI 1 (inRanges(1).1) \<and> 
+  assumes "x1 \<ge> fst(int(1)) \<and> 
+          x1 \<le> snd(int(1)) \<and>
+          x2 \<ge> fst(int(2)) \<and>
+          x2 \<le> snd(int(2))"
+  shows "
+          \<not> f_ann x_1 x_2 \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
+           \<and>           
+          \<not> f_ann x_1 x_2 \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)
+" 
+proof - 
+  have 1: "x1 \<ge> normI 1 (inRanges(1).1) \<and> 
+          x1 \<le> normI 1 (inRanges(1).2) \<and>
+          x2 \<ge> normI 2 (inRanges(2).1) \<and>
+          x2 \<le> normI 2 (inRanges(2).2) \<longrightarrow> 
+          \<not> f_ann x_1 x_2 \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
+          " sorry
+  have 2: "x1 \<ge> normI 1 (inRanges(1).1) \<and> 
           x1 \<le> normI 1 (inRanges(1).2) \<and>
           x2 \<ge> normI 2 (inRanges(2).1) \<and>
           x2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
-          \<not> annout 2 1 [x1, x2] \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
-          " by sorry
-
-lemma marabou_results_lemma_2:
-  fixes x1 x2 :: real
-  shows "x1 \<ge> normI 1 (inRanges(1).1) \<and>
-          x1 \<le> normI 1 (inRanges(1).2) \<and>
-          x2 \<ge> normI 2 (inRanges(2).1) \<and>
-          x2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
-          \<not> annout 2 1 [x1, x2] \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)"
-       by sorry
-
-(*Instantiated marabou: *)
-thm marabou_results_lemma_1[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"]
-thm marabou_results_lemma_2[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"]
+          \<not> f_ann x_1 x_2 \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)
+        " sorry
+  from 1 2 show "?thesis" using assms by (simp add: int_def) 
+qed
 
 
 (*Rewrite this using our interval definitions, and f_ann, and spec_f. *)
@@ -215,8 +223,7 @@ proof -
           x_2 \<le> inRanges(2).2"
     (*This works: *)
    
-  from marabou_results_lemma_1[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"] and
-marabou_results_lemma_2[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"] have m3: 
+  from marabou_combined_results[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"] have m3: 
           "normI 1 x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
           normI 1 x_1 \<le> normI 1 (inRanges(1).2) \<and>
           normI 2 x_2 \<ge> normI 2 (inRanges(2).1) \<and>
@@ -229,7 +236,7 @@ marabou_results_lemma_2[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"] have 
           \<not> annout 2 1 [normI 1 x_1, normI 2 x_2] \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
            \<and>
           \<not> annout 2 1 [normI 1 x_1, normI 2 x_2] \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)"
-    by auto
+    by (simp add: int_def)
     
   have "... \<longrightarrow>
   
