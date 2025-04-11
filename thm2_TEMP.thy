@@ -100,26 +100,50 @@ term "snd(int(2))"
 to the last layer of our example: *)
 abbreviation "f_ann x y \<equiv> annout 2 1 [x,y]"
 
-lemma spec_mono_ann:
-  fixes x_1 x_2 y_1 y_2 :: real and S :: "real \<Rightarrow> real \<Rightarrow> real"
+
+lemma spec_mono_ann_auto:
+  fixes x_1 x_2 y_1 y_2 :: real and
+        S :: "real \<Rightarrow> real \<Rightarrow> real" and 
+        f :: "real \<Rightarrow> real \<Rightarrow> real" 
   assumes 
           "fst(int(1)) \<le> x_1 \<and> x_1 \<le> snd(int(1))" and 
           "fst(int(2)) \<le> x_2 \<and> x_2 \<le> snd(int(2))" and 
           "(snd(outRanges ! 0) > fst(outRanges ! 0) \<and> snd(annRange) > fst(annRange))" and
           "\<epsilon> \<ge> 0" and 
           "P > 0 \<and> D > 0" and
-          "f_ann x_1 x_2 \<le> normO 1 (S (fst(int(1))) (fst(int(2))) + \<epsilon>)
-               \<and> f_ann x_1 x_2 \<ge> normO 1 (S (snd(int(1))) (snd(int(2))) - \<epsilon>) 
+          "f x_1 x_2 \<le> normO 1 (S (fst(int(1))) (fst(int(2))) + \<epsilon>)
+               \<and> f x_1 x_2 \<ge> normO 1 (S (snd(int(1))) (snd(int(2))) - \<epsilon>) 
               " and 
           (*Monotonicity property for our specification function: *)
           "\<forall> x_1 x_2 y_1 y_2 :: real. x_1 \<le> y_1 \<and> x_2 \<le> y_2 \<longrightarrow> S x_1 x_2 \<le> S y_1 y_2"
         shows "
-               f_ann x_1 x_2 \<ge> (normO 1 (S (x_1) (x_2) - \<epsilon>)) \<and>
-               f_ann x_1 x_2 \<le> (normO 1 (S (x_1) (x_2) + \<epsilon>)) 
+               f x_1 x_2 \<ge> (normO 1 (S (x_1) (x_2) - \<epsilon>)) \<and>
+               f x_1 x_2 \<le> (normO 1 (S (x_1) (x_2) + \<epsilon>)) 
+                "
+    
+
+lemma spec_mono_ann:
+  fixes x_1 x_2 y_1 y_2 :: real and
+        S :: "real \<Rightarrow> real \<Rightarrow> real" and 
+        f :: "real \<Rightarrow> real \<Rightarrow> real" 
+  assumes 
+          "fst(int(1)) \<le> x_1 \<and> x_1 \<le> snd(int(1))" and 
+          "fst(int(2)) \<le> x_2 \<and> x_2 \<le> snd(int(2))" and 
+          "(snd(outRanges ! 0) > fst(outRanges ! 0) \<and> snd(annRange) > fst(annRange))" and
+          "\<epsilon> \<ge> 0" and 
+          "P > 0 \<and> D > 0" and
+          "f x_1 x_2 \<le> normO 1 (S (fst(int(1))) (fst(int(2))) + \<epsilon>)
+               \<and> f x_1 x_2 \<ge> normO 1 (S (snd(int(1))) (snd(int(2))) - \<epsilon>) 
+              " and 
+          (*Monotonicity property for our specification function: *)
+          "\<forall> x_1 x_2 y_1 y_2 :: real. x_1 \<le> y_1 \<and> x_2 \<le> y_2 \<longrightarrow> S x_1 x_2 \<le> S y_1 y_2"
+        shows "
+               f x_1 x_2 \<ge> (normO 1 (S (x_1) (x_2) - \<epsilon>)) \<and>
+               f x_1 x_2 \<le> (normO 1 (S (x_1) (x_2) + \<epsilon>)) 
                 "
 proof (rule conjI)
-  have 1: "f_ann x_1 x_2 \<le> normO 1 (S (fst(int(1))) (fst(int(2))) + \<epsilon>)" using assms by simp 
-  have 2: "f_ann x_1 x_2 \<ge> normO 1 (S (snd(int(1))) (snd(int(2))) - \<epsilon>)" using assms by simp
+  have 1: "f x_1 x_2 \<le> normO 1 (S (fst(int(1))) (fst(int(2))) + \<epsilon>)" using assms by simp 
+  have 2: "f x_1 x_2 \<ge> normO 1 (S (snd(int(1))) (snd(int(2))) - \<epsilon>)" using assms by simp
 
   (*GOAL 1: first conjunct of the goal: *)
   from assms(1) assms(2) have "x_1 \<ge> fst(int(1)) \<and> x_2 \<ge> fst(int(2))" by simp
@@ -134,7 +158,7 @@ proof (rule conjI)
     using assms 
     apply (simp add: mono_normO)
     by (smt (verit, ccfv_SIG) diff_Suc_1 mono_normO)
-  from 1 c1 show "f_ann x_1 x_2 \<le> normO 1 ((S x_1 x_2) + \<epsilon>)"
+  from 1 c1 show "f x_1 x_2 \<le> normO 1 ((S x_1 x_2) + \<epsilon>)"
     using \<open>fst (thm2_TEMP.int(1)\<^sub>s) \<le> x_1 \<and> fst (thm2_TEMP.int(2)\<^sub>s) \<le> x_2\<close> \<open>fst (thm2_TEMP.int(2)\<^sub>s) \<le> x_2 \<longrightarrow> S (fst (thm2_TEMP.int(1)\<^sub>s)) (fst (thm2_TEMP.int(2)\<^sub>s)) \<le> S x_1 x_2\<close> by argo
     
   (*Goal 2: second cojunct of the goal: *)
@@ -150,7 +174,7 @@ proof (rule conjI)
     using assms 
     apply (simp add: mono_normO)
     by (smt (verit, ccfv_SIG) diff_Suc_1 mono_normO)
-  from 2 c2 show "f_ann x_1 x_2 \<ge> (normO 1 (S (x_1) (x_2) - \<epsilon>))"
+  from 2 c2 show "f x_1 x_2 \<ge> (normO 1 (S (x_1) (x_2) - \<epsilon>))"
     using \<open>x_1 \<le> snd (thm2_TEMP.int(1)\<^sub>s) \<and> x_2 \<le> snd (thm2_TEMP.int(2)\<^sub>s)\<close> \<open>x_2 \<le> snd (thm2_TEMP.int(2)\<^sub>s) \<longrightarrow> S x_1 x_2 \<le> S (snd (thm2_TEMP.int(1)\<^sub>s)) (snd (thm2_TEMP.int(2)\<^sub>s))\<close> by linarith
 qed
 
@@ -285,7 +309,7 @@ proof -
      annout 2 1 [normI 1 x_1, normI 2 x_2] \<le> normO 1 (norm_spec_f_2 (normI 1 x_1) (normI 2 x_2) + \<epsilon>)
     "
      apply (rule impI)
-     apply (rule spec_mono_ann)
+     apply (rule spec_mono_ann[where f="f_ann"])
    proof - 
      assume "normI 1 x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
           normI 1 x_1 \<le> normI 1 (inRanges(1).2) \<and>
