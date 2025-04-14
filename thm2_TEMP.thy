@@ -99,27 +99,6 @@ term "snd(int(2))"
 (*Abbreviation for readability, referring to the f_ann as annout 2 1 to correspond 
 to the last layer of our example: *)
 abbreviation "f_ann x y \<equiv> annout 2 1 [x,y]"
-
-
-lemma spec_mono_ann_auto:
-  fixes x_1 x_2 y_1 y_2 :: real and
-        S :: "real \<Rightarrow> real \<Rightarrow> real" and 
-        f :: "real \<Rightarrow> real \<Rightarrow> real" 
-  assumes 
-          "fst(int(1)) \<le> x_1 \<and> x_1 \<le> snd(int(1))" and 
-          "fst(int(2)) \<le> x_2 \<and> x_2 \<le> snd(int(2))" and 
-          "(snd(outRanges ! 0) > fst(outRanges ! 0) \<and> snd(annRange) > fst(annRange))" and
-          "\<epsilon> \<ge> 0" and 
-          "P > 0 \<and> D > 0" and
-          "f x_1 x_2 \<le> normO 1 (S (fst(int(1))) (fst(int(2))) + \<epsilon>)
-               \<and> f x_1 x_2 \<ge> normO 1 (S (snd(int(1))) (snd(int(2))) - \<epsilon>) 
-              " and 
-          (*Monotonicity property for our specification function: *)
-          "\<forall> x_1 x_2 y_1 y_2 :: real. x_1 \<le> y_1 \<and> x_2 \<le> y_2 \<longrightarrow> S x_1 x_2 \<le> S y_1 y_2"
-        shows "
-               f x_1 x_2 \<ge> (normO 1 (S (x_1) (x_2) - \<epsilon>)) \<and>
-               f x_1 x_2 \<le> (normO 1 (S (x_1) (x_2) + \<epsilon>)) 
-                "
     
 
 lemma spec_mono_ann:
