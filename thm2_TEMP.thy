@@ -169,22 +169,22 @@ lemma marabou_combined_results:
           x2 \<ge> fst(int(2)) \<and>
           x2 \<le> snd(int(2))"
   shows "
-          \<not> f_ann x_1 x_2 \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
+          \<not> f_ann x1 x2 \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
            \<and>           
-          \<not> f_ann x_1 x_2 \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)
+          \<not> f_ann x1 x2 \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)
 " 
 proof - 
   have 1: "x1 \<ge> normI 1 (inRanges(1).1) \<and> 
           x1 \<le> normI 1 (inRanges(1).2) \<and>
-          x2 \<ge> normI 2 (inRanges(2).1) \<and>
+          x2 \<ge> normI 2 (inRanges(2).1) \<and>   
           x2 \<le> normI 2 (inRanges(2).2) \<longrightarrow> 
-          \<not> f_ann x_1 x_2 \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
+          \<not> f_ann x1 x2 \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
           " sorry
   have 2: "x1 \<ge> normI 1 (inRanges(1).1) \<and> 
           x1 \<le> normI 1 (inRanges(1).2) \<and>
           x2 \<ge> normI 2 (inRanges(2).1) \<and>
           x2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
-          \<not> f_ann x_1 x_2 \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)
+          \<not> f_ann x1 x2 \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)
         " sorry
   from 1 2 show "?thesis" using assms by (simp add: int_def) 
 qed
@@ -192,6 +192,7 @@ qed
 
 (*Rewrite this using our interval definitions, and f_ann, and spec_f. *)
 theorem controller_conformance:
+  fixes x_1 x_2 :: real
   assumes 
     (*Assumption on epsilon*)
     "\<epsilon> \<ge> 0" and
@@ -201,28 +202,27 @@ theorem controller_conformance:
           snd(inRanges ! i) > fst(inRanges ! i) \<and> snd(annRange) > fst(annRange)" and
 
     (*The assumption on the range of the variables, we need them to be within the defined input ranges. *) 
-    "P > 0 \<and> D > 0" 
+    "P > 0 \<and> D > 0"  and
 
+    "x_1 \<ge> inRanges(1).1 \<and> 
+     x_1 \<le> inRanges(1).2 \<and>
+     x_2 \<ge> inRanges(2).1 \<and>
+     x_2 \<le> inRanges(2).2"
+
+  
   (*We need to show our goal under a range of our bound input variables. 
     This has to be here, the range assumptions, not as an assumption. *)
-  shows "\<And> x_1 x_2 :: real. x_1 \<ge> inRanges(1).1 \<and> 
-          x_1 \<le> inRanges(1).2 \<and>
-          x_2 \<ge> inRanges(2).1 \<and>
-          x_2 \<le> inRanges(2).2 \<Longrightarrow> (conf_sin \<epsilon> angleOutputE AnglePIDANN AnglePID_C)" 
-   apply (rule conf_vcs)
+  shows " (conf_sin \<epsilon> angleOutputE AnglePIDANN AnglePID_C)" 
+   apply (rule conf_vcs)  
   (*Discharge first assumption: *)
    apply (simp add: assms(1))
 
 proof - 
-  (*Start with some fixed variables, we have no assumptions about them here: *)
-  fix x_1 x_2 y_1 :: real
-
   (*Assumption, if we take the ranges of *)
-
-  assume 1:"x_1 \<ge> inRanges(1).1 \<and> 
+  have 1:"x_1 \<ge> inRanges(1).1 \<and> 
           x_1 \<le> inRanges(1).2 \<and>
           x_2 \<ge> inRanges(2).1 \<and>
-          x_2 \<le> inRanges(2).2"
+          x_2 \<le> inRanges(2).2" using assms by simp
     (*This works: *)
    
   from marabou_combined_results[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"] have m3: 
@@ -274,7 +274,6 @@ proof -
      annout 2 1 [normI 1 x_1, normI 2 x_2] \<ge> normO 1 (norm_spec_f_2 (snd(int(1))) (snd(int(2))) - \<epsilon>)
       \<and> 
      annout 2 1 [normI 1 x_1, normI 2 x_2] \<le> normO 1 (norm_spec_f_2 (fst(int(1))) (fst(int(2))) + \<epsilon>)
-     
     "
      apply (simp)
      done
