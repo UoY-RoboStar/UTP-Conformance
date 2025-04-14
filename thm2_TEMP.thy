@@ -110,7 +110,6 @@ lemma spec_mono_ann:
           "fst(int(2)) \<le> x_2 \<and> x_2 \<le> snd(int(2))" and 
           "(snd(outRanges ! 0) > fst(outRanges ! 0) \<and> snd(annRange) > fst(annRange))" and
           "\<epsilon> \<ge> 0" and 
-          "P > 0 \<and> D > 0" and
           "f x_1 x_2 \<le> normO 1 (S (fst(int(1))) (fst(int(2))) + \<epsilon>)
                \<and> f x_1 x_2 \<ge> normO 1 (S (snd(int(1))) (snd(int(2))) - \<epsilon>) 
               " and 
@@ -310,9 +309,6 @@ proof -
        
 
     show "0 \<le> \<epsilon>" 
-       using assms by simp
-
-     show "0 < P \<and> 0 < D" 
        using assms by simp
 
      show "fst (outRanges ! 0) < snd (outRanges ! 0) \<and> fst annRange < snd annRange" using assms by simp
