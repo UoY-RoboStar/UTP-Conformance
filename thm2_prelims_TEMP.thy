@@ -215,7 +215,9 @@ fun dotprod :: "(real list \<times> real list) \<Rightarrow> real" where
 fun annout :: "nat \<Rightarrow> nat \<Rightarrow> real list \<Rightarrow> real" where
 "annout 0 n ins = ins(n)" | 
 "annout l n ins = relu( dotprod ( (fun_to_list (layerSize(l-1)) (rel_apply ({(pn, annout (l-1) (pn) (ins)) | pn. pn \<in> {1..layerSize (l-1)}})) ) ,
-                       (weights l n) ) + (biases l n))" 
+                       (weights l n) ) + (biases l n))"  
+
+  
 
 section \<open> AnglePIDANN parameter instantiations \<close>
 

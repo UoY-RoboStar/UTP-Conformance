@@ -18,6 +18,8 @@ within a given range, sure;
 
 Insize outsize.  *)
 (*needs to take number of inputs, *)
+
+
 fun intlist_min :: "nat \<Rightarrow> real list" where 
 "intlist_min 0 = []" | 
 "intlist_min n = [fst(int(n))] @ intlist_min (n-1)"
@@ -25,6 +27,7 @@ fun intlist_min :: "nat \<Rightarrow> real list" where
 fun intlist_max :: "nat \<Rightarrow> real list" where 
 "intlist_max 0 = []" | 
 "intlist_max n = [snd(int(n))] @ intlist_max (n-1)"
+
 
 
 lemma spec_mono_ann_general:
@@ -107,11 +110,41 @@ for every dimension, d
 
 i starts from 0, I IS 0 INDEXED, noInt is the number of SPLITS
  *)
-definition int_split :: "nat \<Rightarrow> nat \<Rightarrow> (real \<times> real) list" where
-"int_split i noInt = [ ( (fst(int(1)) + ((i :: real) * (snd(int(1)) / noInt))), 
-                         (fst(int(1)) + ((i + 1 :: real) * (snd(int(1)) / noInt)))),
-                      ( (fst(int(2)) + ((i :: real) * (snd(int(2)) / noInt))), 
-                         (fst(int(2)) + ((i + 1 :: real) * (snd(int(2)) / noInt)))) ]"
+
+(*We need an nd interval: *)
+
+(*Interval definition: *)
+fun nd_int :: "nat \<Rightarrow> (real \<times> real) list" where
+"nd_int 0 = []" | 
+"nd_int n = [((normI n (fst(inRanges(n)))), ((normI n (snd(inRanges(n))))))] @ nd_int (n-1)"
+
+(*1d int split. for a single interval lower and upper bounds: *)
+definition int_split :: "nat \<Rightarrow> nat \<Rightarrow> real \<times> real \<Rightarrow>  real \<times> real" where
+"int_split i noInt b  = ( fst(b) + ((i :: real) * (snd(b) / noInt)), 
+                             fst(b) + ((i + 1 :: real) * (snd(b) / noInt)) )"
+
+(*Map this onto nd_int
+Works for symmetric, same dimension, but no, we want to query a specific split, 
+a list of splits, as input to be a list of splits, with the same noInt, 
+
+*)
+
+term "  map (int_split i noInt) (nd_int n)"
+
+
+
+(*just a map*)
+term "map (\<lambda> x :: nat. x + 1) [1, 2 :: nat]"
+
+(*Need functions, get the min and the max of each element,  *)
+fun intlistsplit_min :: "nat \<Rightarrow> nat \<Rightarrow> nat \<Rightarrow> real list" where 
+"intlistsplit_min 0 i noInt = []" | 
+"intlistsplit_min n i noInt = [fst((int_split i noInt)(n))] @ intlist_min (n-1)"
+
+fun intlistsplit_max :: "nat \<Rightarrow> nat \<Rightarrow> nat \<Rightarrow> real list" where 
+"intlistsplit_max 0 i noInt = []" | 
+"intlistsplit_max n i noInt = [snd((int_split i noInt)(n))] @ intlist_max (n-1)"
+
 
 
 (*Marabou interval results: *)
@@ -119,25 +152,54 @@ definition int_split :: "nat \<Rightarrow> nat \<Rightarrow> (real \<times> real
 (*Temporary, but shows that with one interval, we obtain 
 2 queries, as is our hard coded marabou results lemma as below.
 
-Will expand to generate noInt * 2 (for every dimension, *)
-lemma marabou_interval_results: 
-  fixes x :: real list and noInt :: nat and inSize :: nat and FANN :: real list \<Rightarrow> real
+Will expand to generate noInt * 2 (for every dimension,
+for all inputs, i is the input size, two for every input dimension. 
+For every interval, we have one query? for every split, 
+
+N intervals, but still two dimensions, 
+
+proof if set noInt, given some value for noInt and inSize. 
+
+Given some specification function S, split automatically? Instantiated with some S? 
+
+We need to build the list though, 
+ *)
+lemma marabou_interval_results_gen: 
+  fixes x :: "real list" and noInt :: nat and insize :: nat and S :: "real list \<Rightarrow> real"
   assumes "noInt = 1"
   shows "
-          (\<forall> int_list :: nat list. (# int_list = inSize \<and> 
-              (\<forall> i :: nat. i \<in> {1..(#int_list)} \<longrightarrow> int_list(n) \<in> {0..(noInt-1)}) ) \<longrightarrow>
-          (\<forall> i :: nat. i \<in> {1..inSize} \<longrightarrow> 
+          \<forall> int_list :: nat list. #int_list = insize \<longrightarrow> 
+            (\<forall> i . i \<in> {1..insize} \<longrightarrow> int_list(i)\<^sub>s \<in> {1..noInt} \<longrightarrow>
+
+          
           (x(i) \<ge> fst((int_split (int_list(i)) noInt)(i)) \<and> 
-           x(i) \<le> snd((int_split (int_list(i)) noInt)(i))))
+           x(i) \<le> snd((int_split (int_list(i)) noInt)(i)))
           \<longrightarrow>
-          \<not> FANN x \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
-           \<and>   
-          (\<forall> i :: nat. i \<in> {1..inSize} \<longrightarrow>
+          \<not> f_ann (x(1)) (x(2)) \<ge> S() + \<epsilon>
+           \<and>  
+          \<not> f_ann (x(1)) (x(2)) \<le> S() - \<epsilon>
+        )
+
+        " sorry
+lemma marabou_interval_results: 
+  fixes x :: "real list" and noInt :: nat and insize :: nat
+  assumes "noInt = 1"
+  shows "
+          \<forall> int_list :: nat list. #int_list = insize \<longrightarrow> 
+            (\<forall> i . i \<in> {1..insize} \<longrightarrow> int_list(i)\<^sub>s \<in> {1..noInt} \<longrightarrow>
+
+          
           (x(i) \<ge> fst((int_split (int_list(i)) noInt)(i)) \<and> 
-           x(i) \<le> snd((int_split (int_list(i)) noInt)(i))))
-          \<longrightarrow>       
-          \<not> FANN x \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>))
-" 
+           x(i) \<le> snd((int_split (int_list(i)) noInt)(i)))
+          \<longrightarrow>
+          \<not> f_ann (x(1)) (x(2)) \<ge> normO 1 ((P * denormI 1 (fst((int_split (int_list(1)) noInt)(1))) + 
+                     (D * denormI 2 (fst((int_split (int_list(1)) noInt)(1)))) ) + \<epsilon>)
+           \<and>  
+          \<not> f_ann (x(1)) (x(2)) \<le> normO 1 ((P * denormI 1 (snd((int_split (int_list(1)) noInt)(1))) + 
+                     (D * denormI 2 (snd((int_split (int_list(1)) noInt)(1)))) ) - \<epsilon>)
+        )
+
+        " 
 proof - 
   show "?thesis" 
     apply (simp add: assms)
