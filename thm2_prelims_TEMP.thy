@@ -18,13 +18,47 @@ text \<open>These are the constants of our ANN semantics, the constants we have 
 
 subsection \<open> Basic ANN Constants \<close>
 
-consts layerSize :: "nat \<Rightarrow> nat" 
-       insize :: nat 
-       outsize :: nat
-       layerStructure :: "nat list"
-       layerNo :: nat 
-       weights :: "real list list list"
-       biases :: "real list list" 
+consts layerSizeC :: "nat \<Rightarrow> nat" 
+       insizeC :: nat 
+       outsizeC :: nat
+       layerStructureC :: "nat list"
+       layerNoC :: nat 
+       weightsC :: "real list list list"
+       biasesC :: "real list list" 
+
+
+definition layerSize :: "nat \<Rightarrow> nat" where
+"layerSize x = x"
+
+definition insize :: "nat" where
+"insize = 2"
+
+definition outsize :: "nat" where
+"outsize = 1"
+
+definition layerstructure :: "nat list" where
+"layerstructure = [1,1]"
+
+definition layerNo :: "nat"  where
+"layerNo = 2"
+
+definition maxSize :: "nat" where
+"maxSize = 1"
+
+definition weights :: "real list list list" where
+"weights = [[[1.22838,0.132874]], [[0.744636]]]"
+
+definition biases :: "real list list" where 
+"biases = [[0.125424], [-0.107753]]"
+
+definition inRanges :: "(real \<times> real) list" where
+"inRanges = [(-30,30), (-250,250)]" 
+
+definition outRanges :: "(real \<times> real) list" where
+"outRanges = [(-1950, 1950)]" 
+
+definition annRange :: "(real \<times> real)" where
+"annRange = (0,1)" 
 
 fun relu :: "real \<Rightarrow> real" where
 "relu x = max x 0"
@@ -41,14 +75,15 @@ text \<open> These are the definitions of the functions and constants we need to
 
 text \<open> Definition 4 mechanisation (from report) \<close>
 
+(*
 locale thm2 =
   fixes inRanges :: "(real \<times> real) list"
   and outRanges :: "(real \<times> real) list"
-  and annRange :: "(real \<times> real)"
+  and annRange :: "(real \<times> real)"*)
 
-consts inRanges :: "(real \<times> real) list"
-       outRanges :: "(real \<times> real) list"
-       annRange :: "(real \<times> real)"
+consts inRangesC :: "(real \<times> real) list"
+       outRangesC :: "(real \<times> real) list"
+       annRangeC :: "(real \<times> real)"
 
 definition norm :: "real \<Rightarrow> (real \<times> real) \<Rightarrow> (real \<times> real) \<Rightarrow> real" where
 "norm val oldrange newrange = (((val - fst(oldrange)) / (snd(oldrange) - fst(oldrange))) 
@@ -184,37 +219,5 @@ fun annout :: "nat \<Rightarrow> nat \<Rightarrow> real list \<Rightarrow> real"
 
 section \<open> AnglePIDANN parameter instantiations \<close>
 
-definition layerSize_ex :: "nat \<Rightarrow> nat" where
-"layerSize_ex x = x"
-
-definition insize_ex :: "nat" where
-"insize_ex = 2"
-
-definition outsize_ex :: "nat" where
-"outsize_ex = 1"
-
-definition layerstructure_ex :: "nat list" where
-"layerstructure_ex = [1,1]"
-
-definition layerNo_ex :: "nat"  where
-"layerNo_ex = 2"
-
-definition maxSize_ex :: "nat" where
-"maxSize_ex = 1"
-
-definition weights_ex :: "real list list list" where
-"weights_ex = [[[1.22838,0.132874]], [[0.744636]]]"
-
-definition biases_ex :: "real list list" where 
-"biases_ex = [[0.125424], [-0.107753]]"
-
-definition inRanges_ex :: "(real \<times> real) list" where
-"inRanges_ex = [(-30,30), (-250,250)]" 
-
-definition outRanges_ex :: "(real \<times> real) list" where
-"outRanges_ex = [(-1950, 1950)]" 
-
-definition annRange_ex :: "(real \<times> real)" where
-"annRange_ex = (0,1)" 
 
 end

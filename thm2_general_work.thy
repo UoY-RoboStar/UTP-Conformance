@@ -42,15 +42,15 @@ lemma spec_mono_ann_general:
           "\<epsilon> \<ge> 0" and 
           
           (*Monotonicity property for our specification function: 
-          Needs to be monotonic in every variable, this assumption shows this:*)
-          "(\<forall> x y :: real list. 
-             (\<forall> n :: nat. n \<le> insize \<longrightarrow> (x(n) \<le> y(n))) 
-             \<longrightarrow>
-             (\<forall> out :: nat. out \<le> outsize \<longrightarrow> (S x)(out) \<le> (S y)(out)))" and
+          Needs to be monotonic in every variable, this assumption shows this:
+          Every output is monotonically increasing, is this *)
+          "\<forall> x y :: real list. 
+             (\<forall> n :: nat. n \<le> insize \<longrightarrow>  (x(n) \<le> y(n))) \<longrightarrow>
+             (\<forall> out :: nat. out \<le> outsize \<longrightarrow> (S x)(out) \<le> (S y)(out))" and
 
           "#x = insize"
   
-shows "\<forall> n :: nat. 
+shows "\<forall> n :: nat. n \<in> {1..outsize} \<longrightarrow>
            (f x)(n) \<le> normO n ((S (intlist_min(varNo)))(n) + \<epsilon>) \<and>
            (f x)(n) \<ge> normO n ((S (intlist_max(varNo)))(n) - \<epsilon>) 
            \<longrightarrow>

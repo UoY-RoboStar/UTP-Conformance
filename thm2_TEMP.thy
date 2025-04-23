@@ -19,8 +19,10 @@ text \<open> We declare the semantics of the controllers as constants for now, w
        a constant, to be initialised later. \<close>
 consts AnglePIDANN :: "(context_ch, 's) caction"
        AnglePID_C :: "(context_ch, 's) caction"
-       \<epsilon> :: "real"
-       \<delta> :: "real"
+       \<epsilon>C :: "real"
+
+definition \<epsilon> :: "real" where 
+"\<epsilon> = 1.0"
 
 section \<open> Proofs \<close>
 
@@ -29,8 +31,12 @@ text \<open> Theorem 4 from the report, the theorem that shows the verification 
 text \<open> Automating the proof of this theorem is future work, we have proved a similar theorem on paper though. \<close>
 (*P and D should not be free, should be constants: *)
 
-consts P :: "real"
-       D :: "real"
+consts PC :: "real"
+       DC :: "real"
+
+definition P :: "real" where "P = 60.0"
+definition D :: "real" where "D = 0.6"
+
 
 (*If they appear free here, they are for any input, this is a statement about
 this input, not for all input, *)
@@ -162,6 +168,69 @@ qed
 If Marabou returns SAT, a counterexample, currently, we will choose another epsilon
 such that this holds. *)
 
+(*We need to evaluate both: *)
+term "inRanges"
+
+
+(*The idea is, we have 2 facts that are evaluated expressions, that we use 
+to show the truth of symbolic expressions, with constant definitions
+
+That we can then reason about the fst int, etc, algebriacally within Isabelle.
+
+But we only prove the evaluated expressions, it only works if we instantiate 
+the constants but this is fine. *)
+
+(*Evaluated expressions, for Marabou translation: *)
+value "fst(int(1))"
+value "snd(int(1))"
+value "fst(int(2))"
+value "snd(int(2))"
+value "normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)"
+value "normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)"
+
+(*We need to have a strategy for the splits, automatically. 
+we already have int, meaningless without the splits. 
+
+We need it to be automatic, automated evaluation as well. 
+
+*)
+
+lemma marabou_evaluated_results: 
+  fixes x1 x2 :: real
+  assumes "x1 \<ge> fst(int(1)) \<and> 
+          x1 \<le> snd(int(1)) \<and>
+          x2 \<ge> fst(int(2)) \<and>
+          x2 \<le> snd(int(2))"
+  shows "
+          \<not> f_ann x1 x2 \<ge> normO 1 ((P * denormI 1 (fst(int(1))) + (D * denormI 2 (fst(int(2)))) ) + \<epsilon>)
+           \<and>           
+          \<not> f_ann x1 x2 \<le> normO 1 ((P * denormI 1 (snd(int(1))) + (D * denormI 2 (snd(int(2)))) ) - \<epsilon>)
+" 
+proof - 
+  have 1: "x1 \<ge> 0 \<and> 
+          x1 \<le> 1 \<and>
+          x2 \<ge> 0 \<and>   
+          x2 \<le> 1 \<longrightarrow> 
+          \<not> f_ann x1 x2 \<ge> (1 / 3900)
+          " sorry
+  have 2: "x1 \<ge> 0 \<and> 
+          x1 \<le> 1 \<and>
+          x2 \<ge> 0 \<and>
+          x2 \<le> 1 \<longrightarrow>
+          \<not> f_ann x1 x2 \<le> (3899 / 3900)
+        " sorry
+  
+  from 1 2 show "?thesis"
+    using assms unfolding int_def P_def D_def inRanges_def annRange_def normI_def norm_def int_def
+denormI_def normO_def outRanges_def \<epsilon>_def
+    apply (simp)
+    done    
+qed
+
+
+
+
+
 lemma marabou_combined_results: 
   fixes x1 x2 :: real
   assumes "x1 \<ge> fst(int(1)) \<and> 
@@ -225,7 +294,7 @@ proof -
           x_2 \<le> inRanges(2).2" using assms by simp
     (*This works: *)
    
-  from marabou_combined_results[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"] have m3: 
+  from marabou_evaluated_results[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"] have m3: 
           "normI 1 x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
           normI 1 x_1 \<le> normI 1 (inRanges(1).2) \<and>
           normI 2 x_2 \<ge> normI 2 (inRanges(2).1) \<and>

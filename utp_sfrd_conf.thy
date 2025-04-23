@@ -8,7 +8,7 @@ theory utp_sfrd_conf
 begin
 
 subsection \<open> Preliminaries \<close>
-
+                          
 text \<open> We use caction as a type synonym to represent a Circus action in UTP, with event type 'e and 
      state type 's.
      We define caction as a synonym for the stateful failure reactive designs (sfrd) homogenous relation (hrel).
