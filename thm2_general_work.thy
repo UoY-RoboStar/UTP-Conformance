@@ -37,7 +37,7 @@ lemma spec_mono_ann_general:
         x y :: "real list" and
         S f :: "real list \<Rightarrow> real list"
       assumes 
-          "\<forall> n :: nat. n \<le> varNo \<longrightarrow> fst(int(i)) \<le> x(i) \<and> x(i) \<le> snd(int(i))" and 
+          "\<forall> n :: nat. n \<le> varNo \<longrightarrow> fst(normRanges(i)) \<le> x(i) \<and> x(i) \<le> snd(normRanges(i))" and 
           "\<forall> n :: nat. 
             (snd(outRanges ! n) > fst(outRanges ! n) \<and> 
             snd(annRange) > fst(annRange))" and
