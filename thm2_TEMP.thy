@@ -40,6 +40,8 @@ definition D :: "real" where "D = 0.6"
 
 (*If they appear free here, they are for any input, this is a statement about
 this input, not for all input, *)
+(*This must be a strengthening, because it is about the patterns, it is a predicate 
+on a vector space, that is stronger than the UTP patterns. *)
 theorem conf_vcs:
   fixes x_1 x_2 y_1 :: real
 assumes "\<epsilon> \<ge> 0" and 
@@ -110,36 +112,36 @@ proof (rule conjI)
 
   (*GOAL 1: first conjunct of the goal: *)
   from assms(1) assms(2) have "x_1 \<ge> fst(normRanges(1)) \<and> x_2 \<ge> fst(normRanges(2))" by simp
-  have "... \<longrightarrow> 
-        (S x_1 x_2) \<ge> (S (fst(normRanges(1))) (fst(normRanges(2))))" 
+  have "... = 
+        ((S x_1 x_2) \<ge> (S (fst(normRanges(1))) (fst(normRanges(2)))))" 
     using assms by simp
-  have "... \<longrightarrow> 
-        (S x_1 x_2) + \<epsilon> \<ge> (S (fst(normRanges(1))) (fst(normRanges(2)))) + \<epsilon>"
+  have "... = 
+        ((S x_1 x_2) + \<epsilon> \<ge> (S (fst(normRanges(1))) (fst(normRanges(2)))) + \<epsilon>)"
     by simp
-  have c1:"... \<longrightarrow> 
-        normO 1 ((S x_1 x_2) + \<epsilon>) \<ge> normO 1 ((S (fst(normRanges(1))) (fst(normRanges(2)))) + \<epsilon>)"
+  have c1:"... = 
+        (normO 1 ((S x_1 x_2) + \<epsilon>) \<ge> normO 1 ((S (fst(normRanges(1))) (fst(normRanges(2)))) + \<epsilon>))"
     using assms 
     apply (simp add: mono_normO)
     by (smt (verit, ccfv_SIG) diff_Suc_1 mono_normO)
   from 1 c1 show "f x_1 x_2 \<le> normO 1 ((S x_1 x_2) + \<epsilon>)"
-    using \<open>fst (thm2_TEMP.normRanges(1)\<^sub>s) \<le> x_1 \<and> fst (thm2_TEMP.normRanges(2)\<^sub>s) \<le> x_2\<close> \<open>fst (thm2_TEMP.normRanges(2)\<^sub>s) \<le> x_2 \<longrightarrow> S (fst (thm2_TEMP.normRanges(1)\<^sub>s)) (fst (thm2_TEMP.normRanges(2)\<^sub>s)) \<le> S x_1 x_2\<close> by argo
+    using \<open>(fst (normRanges(2)\<^sub>s) \<le> x_2) = (S (fst (normRanges(1)\<^sub>s)) (fst (normRanges(2)\<^sub>s)) \<le> S x_1 x_2)\<close> \<open>fst (normRanges(1)\<^sub>s) \<le> x_1 \<and> fst (normRanges(2)\<^sub>s) \<le> x_2\<close> by argo
     
   (*Goal 2: second cojunct of the goal: *)
   from assms(1) assms(2) have "x_1 \<le> snd(normRanges(1)) \<and> x_2 \<le> snd(normRanges(2))" by simp
-  have "... \<longrightarrow> 
-        (S x_1 x_2) \<le> (S (snd(normRanges(1))) (snd(normRanges(2))))" 
+  have "... = 
+        ((S x_1 x_2) \<le> (S (snd(normRanges(1))) (snd(normRanges(2)))))" 
     using assms by simp
-  have "... \<longrightarrow> 
-        (S x_1 x_2) - \<epsilon> \<le> (S (snd(normRanges(1))) (snd(normRanges(2)))) - \<epsilon>"
+  have "... = 
+        ((S x_1 x_2) - \<epsilon> \<le> (S (snd(normRanges(1))) (snd(normRanges(2)))) - \<epsilon>)"
     by simp
-  have c2: "... \<longrightarrow> 
-        normO 1 ((S x_1 x_2) - \<epsilon>) \<le> normO 1 ((S (snd(normRanges(1))) (snd(normRanges(2)))) - \<epsilon>)"
+  have c2: "... = (normO 1 ((S x_1 x_2) - \<epsilon>) \<le> normO 1 ((S (snd(normRanges(1))) (snd(normRanges(2)))) - \<epsilon>))"
     using assms 
     apply (simp add: mono_normO)
     by (smt (verit, ccfv_SIG) diff_Suc_1 mono_normO)
   from 2 c2 show "f x_1 x_2 \<ge> (normO 1 (S (x_1) (x_2) - \<epsilon>))"
-    using \<open>x_1 \<le> snd (thm2_TEMP.normRanges(1)\<^sub>s) \<and> x_2 \<le> snd (thm2_TEMP.normRanges(2)\<^sub>s)\<close> \<open>x_2 \<le> snd (thm2_TEMP.normRanges(2)\<^sub>s) \<longrightarrow> S x_1 x_2 \<le> S (snd (thm2_TEMP.normRanges(1)\<^sub>s)) (snd (thm2_TEMP.normRanges(2)\<^sub>s))\<close> by linarith
-qed
+    using \<open>(x_2 \<le> snd (normRanges(2)\<^sub>s)) = (S x_1 x_2 \<le> S (snd (normRanges(1)\<^sub>s)) (snd (normRanges(2)\<^sub>s)))\<close> assms(2) by argo
+    
+  qed
 
 (*Marabou combined results: *)
 
@@ -178,17 +180,34 @@ evaluation, we don't want this. evaluating, partial evaluation ?
 
 
 
+
+(*
+
+The function we need to instantiate is; 
+
+(P * denormI 1 (x_1) + (D * denormI 2 (x_2)))
+
+This is norm_spec, f needs to be NORM_SPEC. 
+
+*)
 lemma marabou_results: 
-  fixes x1 x2 :: real
-  assumes "x1 \<ge> fst(normRanges(1)) \<and> 
-          x1 \<le> snd(normRanges(1)) \<and>
-          x2 \<ge> fst(normRanges(2)) \<and>
-          x2 \<le> snd(normRanges(2))"
-  shows "
-          \<not> f_ann x1 x2 \<ge> normO 1 ((P * denormI 1 (fst(normRanges(1))) + (D * denormI 2 (fst(normRanges(2)))) ) + \<epsilon>)
-           \<and>           
-          \<not> f_ann x1 x2 \<le> normO 1 ((P * denormI 1 (snd(normRanges(1))) + (D * denormI 2 (snd(normRanges(2)))) ) - \<epsilon>)
-" 
+  fixes x1 x2 :: real and f :: "real \<Rightarrow> real \<Rightarrow> real"
+  assumes 
+    "fst(normRanges(1)) \<le> x_1 \<and> x_1 \<le> snd(normRanges(1))" and 
+    "fst(normRanges(2)) \<le> x_2 \<and> x_2 \<le> snd(normRanges(2))" and 
+    "(snd(outRanges ! 0) > fst(outRanges ! 0) \<and> snd(annRange) > fst(annRange))" and
+    "\<epsilon> \<ge> 0" and 
+    (*Monotonicity property for our specification function: *)
+    "\<forall> x_1 x_2 y_1 y_2 :: real. x_1 \<le> y_1 \<and> x_2 \<le> y_2 \<longrightarrow> norm_spec x_1 x_2 \<le> norm_spec y_1 y_2" and 
+    "f = norm_spec" and 
+    "x1 \<ge> fst(normRanges(1)) \<and>
+       x1 \<le> snd(normRanges(1)) \<and>
+       x2 \<ge> fst(normRanges(2)) \<and>
+       x2 \<le> snd(normRanges(2))"
+  shows 
+      "\<not> f_ann x1 x2 \<ge> normO 1 ( f x_1 x_2 + \<epsilon>)
+       \<and>           
+       \<not> f_ann x1 x2 \<le> normO 1 ( f x_1 x_2 - \<epsilon>)" 
 proof - 
   have 1: "x1 \<ge> 0 \<and> 
           x1 \<le> 1 \<and>
@@ -204,11 +223,21 @@ proof -
           \<not> f_ann x1 x2 \<le> (3899 / 3900)
         " sorry
   
-  from 1 2 show "?thesis"
+  from 1 2 have "x1 \<ge> fst(normRanges(1)) \<and>
+       x1 \<le> snd(normRanges(1)) \<and>
+       x2 \<ge> fst(normRanges(2)) \<and>
+       x2 \<le> snd(normRanges(2))
+       \<longrightarrow> 
+       \<not> f_ann x1 x2 \<ge> normO 1 ( f (fst(normRanges(1))) (fst(normRanges(2))) + \<epsilon>)
+       \<and>           
+       \<not> f_ann x1 x2 \<le> normO 1 ( f (snd(normRanges(1))) (snd(normRanges(2))) - \<epsilon>)"
     using assms unfolding normRanges_def P_def D_def inRanges_def annRange_def normI_def norm_def normRanges_def
-denormI_def normO_def outRanges_def \<epsilon>_def
+denormI_def normO_def outRanges_def \<epsilon>_def norm_spec_def
     apply (simp)
     done    
+  then show "?thesis" 
+    using assms
+    by (smt (verit, ccfv_SIG) cancel_comm_monoid_add_class.diff_cancel mono_normO) 
 qed
 
 
@@ -238,112 +267,78 @@ shows " (conf_sin \<epsilon> angleOutputE AnglePIDANN AnglePID_C)"
 
 proof - 
 
-  from marabou_results[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"] have m3: 
-          "normI 1 x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
-          normI 1 x_1 \<le> normI 1 (inRanges(1).2) \<and>
-          normI 2 x_2 \<ge> normI 2 (inRanges(2).1) \<and>
-          normI 2 x_2 \<le> normI 2 (inRanges(2).2) \<longrightarrow>
-
-          normI 1 x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
-          normI 1 x_1 \<le> normI 1 (inRanges(1).2) \<and>
-          normI 2 x_2 \<ge> normI 2 (inRanges(2).1) \<and>
-          normI 2 x_2 \<le> normI 2 (inRanges(2).2) \<and>
-     annout 2 1 [normI 1 x_1, normI 2 x_2] \<ge> normO 1 (norm_spec (snd(normRanges(1))) (snd(normRanges(2))) - \<epsilon>)
-      \<and> 
-     annout 2 1 [normI 1 x_1, normI 2 x_2] \<le> normO 1 (norm_spec (fst(normRanges(1))) (fst(normRanges(2))) + \<epsilon>)
-     "
-     using nle_le
-     unfolding norm_spec_def
-     apply (simp add: normRanges_def)
-     by linarith
-  
-  (*Important step, get from the intervals to the actual variables:
-    We can still have this, at the moment, be on the normalised ranges.  *)
-   have "... \<longrightarrow>
-     annout 2 1 [normI 1 x_1, normI 2 x_2] \<ge> normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) - \<epsilon>)
-     \<and> 
-     annout 2 1 [normI 1 x_1, normI 2 x_2] \<le> normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)
-    "
-     apply (rule impI)
-     apply (rule spec_mono_ann[where f="f_ann"])
-   proof - 
-     assume "normI 1 x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
-          normI 1 x_1 \<le> normI 1 (inRanges(1).2) \<and>
-          normI 2 x_2 \<ge> normI 2 (inRanges(2).1) \<and>
-          normI 2 x_2 \<le> normI 2 (inRanges(2).2) \<and>
-          annout 2 1 [normI 1 x_1, normI 2 x_2] \<ge> normO 1 (norm_spec (snd(normRanges(1))) (snd(normRanges(2))) - \<epsilon>)
-      \<and> 
-     annout 2 1 [normI 1 x_1, normI 2 x_2] \<le> normO 1 (norm_spec (fst(normRanges(1))) (fst(normRanges(2))) + \<epsilon>)"
-     show "\<forall> x_1 x_2 y_1 y_2. x_1 \<le> y_1 \<and> x_2 \<le> y_2 \<longrightarrow> norm_spec x_1 x_2 \<le> norm_spec y_1 y_2" 
-       using assms apply (simp add: norm_spec_mono)
-       done
-
-     show "fst (normRanges(1)) \<le> normI 1 x_1 \<and> normI 1 x_1 \<le> snd (normRanges(1))"
-       by (metis \<open>normI 1 (fst (inRanges(1)\<^sub>s)) \<le> normI 1 x_1 \<and> normI 1 x_1 \<le> normI 1 (snd (inRanges(1)\<^sub>s)) \<and> normI 2 (fst (inRanges(2)\<^sub>s)) \<le> normI 2 x_2 \<and> normI 2 x_2 \<le> normI 2 (snd (inRanges(2)\<^sub>s)) \<and> normO 1 (norm_spec (snd (thm2_TEMP.normRanges(1)\<^sub>s)) (snd (thm2_TEMP.normRanges(2)\<^sub>s)) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (norm_spec (fst (thm2_TEMP.normRanges(1)\<^sub>s)) (fst (thm2_TEMP.normRanges(2)\<^sub>s)) + \<epsilon>)\<close> cancel_comm_monoid_add_class.diff_cancel fst_conv nth_Cons_0 snd_conv thm2_TEMP.normRanges_def)
-       
-
-     show "fst (normRanges(2)\<^sub>s) \<le> normI 2 x_2  \<and> normI 2 x_2 \<le> snd (normRanges(2)\<^sub>s)"
-       by (metis One_nat_def \<open>normI 1 (fst (inRanges(1)\<^sub>s)) \<le> normI 1 x_1 \<and> normI 1 x_1 \<le> normI 1 (snd (inRanges(1)\<^sub>s)) \<and> normI 2 (fst (inRanges(2)\<^sub>s)) \<le> normI 2 x_2 \<and> normI 2 x_2 \<le> normI 2 (snd (inRanges(2)\<^sub>s)) \<and> normO 1 (norm_spec (snd (thm2_TEMP.normRanges(1)\<^sub>s)) (snd (thm2_TEMP.normRanges(2)\<^sub>s)) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (norm_spec (fst (thm2_TEMP.normRanges(1)\<^sub>s)) (fst (thm2_TEMP.normRanges(2)\<^sub>s)) + \<epsilon>)\<close> diff_Suc_1 nat_1_add_1 nth_Cons_0 nth_Cons_Suc plus_1_eq_Suc split_pairs thm2_TEMP.normRanges_def)
-       
-
-     show "0 \<le> \<epsilon>" 
-       using assms by simp
-
-     show "fst (outRanges ! 0) < snd (outRanges ! 0) \<and> fst annRange < snd annRange" using assms by simp
-        
-     show 
-     "f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (norm_spec (fst (normRanges(1))) (fst (normRanges(2))) + \<epsilon>) \<and>
-      f_ann (normI 1 x_1) (normI 2 x_2) \<ge> normO 1 (norm_spec (snd (normRanges(1))) (snd (thm2_TEMP.normRanges(2))) - \<epsilon>)"
-       using \<open>normI 1 (fst (inRanges(1)\<^sub>s)) \<le> normI 1 x_1 \<and> normI 1 x_1 \<le> normI 1 (snd (inRanges(1)\<^sub>s)) \<and> normI 2 (fst (inRanges(2)\<^sub>s)) \<le> normI 2 x_2 \<and> normI 2 x_2 \<le> normI 2 (snd (inRanges(2)\<^sub>s)) \<and> normO 1 (norm_spec (snd (thm2_TEMP.normRanges(1)\<^sub>s)) (snd (thm2_TEMP.normRanges(2)\<^sub>s)) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (norm_spec (fst (thm2_TEMP.normRanges(1)\<^sub>s)) (fst (thm2_TEMP.normRanges(2)\<^sub>s)) + \<epsilon>)\<close> by fastforce
-       
-     qed
-
-     have "... = ( 
-      f_ann (normI 1 x_1) (normI 2 x_2) \<ge> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>) \<and>
-      f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>))"
-       unfolding norm_spec_def by simp
-    
-     have "... = ( 
-      denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<ge> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>)) \<and>
-      denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)))"
-       using assms apply (simp add: mono_denormO)
-       by (smt (verit, ccfv_threshold) mono_denormO)
-
-     have "... = (
-        denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<ge> (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>) \<and>
-        denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)
-        )"
-       using assms(2) output_norm_2 by presburger 
-
-      have "... = ( 
-        denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<ge> (P * x_1 + D * x_2 - \<epsilon>) \<and>
-        denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> (P * x_1 + D * x_2 + \<epsilon>)
-        )"
-        using assms(2) input_norm2 by presburger
-
-    have "... = ( 
-        \<bar>denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) - (P * x_1 + D * x_2)\<bar> \<le> \<epsilon>
-        )"
-      by linarith
-
-    have goal:"... \<longrightarrow> ( 
-          y_1 = P * x_1 + D * x_2 \<longrightarrow> \<bar>denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) - y_1\<bar> \<le> \<epsilon>
-        )" apply simp
-        
-      done
-
-    from assms have goal3:"normI 1 x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
+  have 1:"normI 1 x_1 \<ge> normI 1 (inRanges(1).1) \<and> 
           normI 1 x_1 \<le> normI 1 (inRanges(1).2) \<and>
           normI 2 x_2 \<ge> normI 2 (inRanges(2).1) \<and>
           normI 2 x_2 \<le> normI 2 (inRanges(2).2)"
-      by (smt (verit) assms(2) mono_normI)
+      by (smt (verit) assms(2) assms(4) mono_normI)
 
-    have "y_1 = P * x_1 + D * x_2 \<longrightarrow> \<bar>denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) - y_1\<bar> \<le> \<epsilon>"
-      by (metis \<open>(P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>) = (P * x_1 + D * x_2 - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * x_1 + D * x_2 + \<epsilon>)\<close> \<open>(P * x_1 + D * x_2 - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * x_1 + D * x_2 + \<epsilon>) = (\<bar>denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) - (P * x_1 + D * x_2)\<bar> \<le> \<epsilon>)\<close> \<open>(denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>))) = (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)\<close> \<open>(normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)) = (denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)))\<close> \<open>normI 1 (fst (inRanges(1)\<^sub>s)) \<le> normI 1 x_1 \<and> normI 1 x_1 \<le> normI 1 (snd (inRanges(1)\<^sub>s)) \<and> normI 2 (fst (inRanges(2)\<^sub>s)) \<le> normI 2 x_2 \<and> normI 2 x_2 \<le> normI 2 (snd (inRanges(2)\<^sub>s)) \<and> normO 1 (norm_spec (snd (normRanges(1)\<^sub>s)) (snd (normRanges(2)\<^sub>s)) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (norm_spec (fst (normRanges(1)\<^sub>s)) (fst (normRanges(2)\<^sub>s)) + \<epsilon>) \<longrightarrow> normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)\<close> goal3 m3 norm_spec_def)
+    from marabou_results[where ?x1.0="normI 1 x_1" and ?x2.0="normI 2 x_2"] 1 have marabou:
+        "(annout 2 1 [normI 1 x_1, normI 2 x_2] \<ge> normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) - \<epsilon>)
+         \<and> 
+         annout 2 1 [normI 1 x_1, normI 2 x_2] \<le> normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) + \<epsilon>))"
+       using nle_le
+     unfolding norm_spec_def
+     apply (simp add: normRanges_def)
+     by (smt (verit) assms(1) assms(2) assms(3) mono_denormI mult_le_cancel_left_pos)
+    
+    have
+     "(annout 2 1 [normI 1 x_1, normI 2 x_2] \<ge> normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) - \<epsilon>)
+         \<and> 
+         annout 2 1 [normI 1 x_1, normI 2 x_2] \<le> normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)) = 
+      (f_ann (normI 1 x_1) (normI 2 x_2) \<ge> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>) \<and>
+      f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>))"
+      apply (simp only: norm_spec_def)
+      done
+
+   have "... = 
+      (f_ann (normI 1 x_1) (normI 2 x_2) \<ge> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>) \<and>
+      f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>))"
+     unfolding norm_spec_def
+     by force
+    
+   have "... = 
+      (denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<ge> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>)) \<and>
+      denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)))"
+       using assms apply (simp add: mono_denormO)
+       by (smt (verit, ccfv_SIG) mono_denormO)
+                 
+
+   have "... =
+        (denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<ge> (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>) \<and>
+        denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>))
+        "
+     using assms(2)
+     by (metis output_norm_2) 
+
+   have "... = 
+        (denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<ge> (P * x_1 + D * x_2 - \<epsilon>) \<and>
+        denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> (P * x_1 + D * x_2 + \<epsilon>))
+        "
+     by (simp add: assms(2) input_norm2)
+        
+
+    have "... = 
+        (\<bar>denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) - (P * x_1 + D * x_2)\<bar> \<le> \<epsilon>)
+        "
+      by argo
       
-    thus "?thesis" 
-      using assms(1) conf_vcs by (auto)
-
+    have "... = 
+        ((y_1 = (P * x_1) + (D * x_2)) \<longrightarrow>
+             (\<bar>(denormO 1 (annout 2 1 [(normI 1 x_1), (normI 2 x_2)]) ) - y_1 \<bar> \<le> \<epsilon>))"
+      using \<open>(P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>) = (P * x_1 + D * x_2 - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * x_1 + D * x_2 + \<epsilon>)\<close> \<open>(denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>))) = (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)\<close> \<open>(normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)) = (denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)))\<close> \<open>(normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (norm_spec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)) = (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>))\<close> marabou by argo
+    
+    (*This is deriving 2 by drawing in all calculational reasoning, and m3, to show that
+    this is true. This should be done with also and finally, but that is failing beyond three steps ? *)    
+    show "conf_sin \<epsilon> angleOutputE AnglePIDANN AnglePID_C"
+    proof -
+      have 1: "\<epsilon> \<ge> 0" by (simp only: assms(1))
+      have 2:"(y_1 = (P * x_1) + (D * x_2)) \<longrightarrow>
+             (\<bar>(denormO 1 (annout 2 1 [(normI 1 x_1), (normI 2 x_2)]) ) - y_1 \<bar> \<le> \<epsilon>)"
+        using \<open>(P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>) = (P * x_1 + D * x_2 - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * x_1 + D * x_2 + \<epsilon>)\<close> \<open>(denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>))) = (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)\<close> \<open>(normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)) = (denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)))\<close> marabou norm_spec_def by auto
+      from 1 2 show "conf_sin \<epsilon> context_ch.angleOutputE AnglePIDANN AnglePID_C"
+        apply (rule conf_vcs)
+        done
+    qed
   qed
-
 end
