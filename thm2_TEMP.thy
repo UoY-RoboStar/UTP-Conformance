@@ -190,7 +190,7 @@ The function we need to instantiate is;
 
 This is normSpec, f needs to be NORM_SPEC. 
 
-*)
+*)                        
 lemma marabou_results: 
   fixes x1 x2 :: real and f :: "real \<Rightarrow> real \<Rightarrow> real"
   assumes 
@@ -238,6 +238,22 @@ denormI_def normO_def outRanges_def \<epsilon>_def normSpec_def
     by (smt (verit, ccfv_SIG) cancel_comm_monoid_add_class.diff_cancel mono_normO) 
 qed
 
+(*Splits work*)
+
+(*Interval definition: 
+General definitions should be implemented as a function not a list.*)
+definition normRanges_gen :: "nat \<Rightarrow> (real \<times> real)" where
+"normRanges_gen = (\<lambda> n :: nat. 
+            ((normI n (fst(inRanges(n)))), ((normI n (snd(inRanges(n)))))))"
+
+(*1d int split. for a single interval lower and upper bounds: *)
+definition intEval :: "nat list \<Rightarrow> nat \<Rightarrow> (nat \<Rightarrow> (real \<times> real))" where
+"intEval ints noInt = (\<lambda> n :: nat. 
+                    ( fst((normRanges_gen n)) + ((ints(n) :: real) * (snd((normRanges_gen n)) / noInt)), 
+                    fst((normRanges_gen n)) + ((ints(n) + 1 :: real) * (snd((normRanges_gen n)) / noInt)) ))"
+
+term "intEval ints noInt"
+term "fst \<circ> (intEval ints noInt)"
 
 (*Rewrite this using our normRangeserval definitions, and f_ann, and spec_f. *)
 theorem controller_conformance:
@@ -317,7 +333,7 @@ proof -
       have 1: "\<epsilon> \<ge> 0" by (simp only: assms(1))
       have 2:"(y_1 = (P * x_1) + (D * x_2)) \<longrightarrow>
              (\<bar>(denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) ) - y_1 \<bar> \<le> \<epsilon>)"
-        using \<open>(P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>) = (P * x_1 + D * x_2 - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * x_1 + D * x_2 + \<epsilon>)\<close> \<open>(P * x_1 + D * x_2 - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * x_1 + D * x_2 + \<epsilon>) = (\<bar>denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) - (P * x_1 + D * x_2)\<bar> \<le> \<epsilon>)\<close> \<open>(denormO 1 (normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>))) = (normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)\<close> \<open>(normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)) = (denormO 1 (normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)))\<close> \<open>(normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>) = (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)\<close> marabou by presburger        
+        using \<open>(P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>) = (P * x_1 + D * x_2 - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * x_1 + D * x_2 + \<epsilon>)\<close> \<open>(P * x_1 + D * x_2 - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * x_1 + D * x_2 + \<epsilon>) = (\<bar>denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) - (P * x_1 + D * x_2)\<bar> \<le> \<epsilon>)\<close> \<open>(denormO 1 (normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>))) = (normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)\<close> \<open>(normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon>) \<le> f_ann (normI 1 x_1) (normI 2 x_2) \<and> f_ann (normI 1 x_1) (normI 2 x_2) \<le> normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)) = (denormO 1 (normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon>)) \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> denormO 1 (normO 1 (normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>)))\<close> \<open>(normSpec (normI 1 x_1) (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> normSpec (normI 1 x_1) (normI 2 x_2) + \<epsilon>) = (P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) - \<epsilon> \<le> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<and> denormO 1 (f_ann (normI 1 x_1) (normI 2 x_2)) \<le> P * denormI 1 (normI 1 x_1) + D * denormI 2 (normI 2 x_2) + \<epsilon>)\<close> marabou by presburger
        from 1 2 show "conf_sin \<epsilon> context_ch.angleOutputE AnglePIDANN AnglePID_C"
         apply (rule conf_vcs)
         done
